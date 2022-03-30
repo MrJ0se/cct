@@ -1,0 +1,8 @@
+/cache/
+/bin/
+/node_modules/
+/._package.json
+/package-lock.json
+/pnpm-lock.yaml
+*.DS_Store
+/b/

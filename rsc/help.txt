@@ -1,0 +1,45 @@
+c|cmake [<flag|target-flag>...]
+	> flags >
+		dst:${cmake out dir} # default: .
+		src:${cmake in dir} # default: .
+		clear # erase files of out directory
+		config|build # actions of cmake
+# import a library
+i|import <libname> <libversion> [<flag|target-flag>...]
+	> flags >
+		lo-{key}:${value} # set a library option (Importer capabilities), default: provided by importer to each key
+		dst:${dir to export library} # default: .
+		purge-file # clear cache file zip file (if has)
+		purge-source # clear cache source code
+		purge-build # clear cache old build
+# loop to debug information of cct about a tool
+t|tool
+# clear meta cache (tools and saved forms)
+pm|purge-meta
+# start a playground ssl server for test wasm build
+ws|webserver <module name>
+ct|countlines
+#show this
+h|help
+
+==== common ====
+? # joker flag, show forms in import and cmake ci
+> target-flag>
+	# common
+		p|platform:<win32|uwp|linux|darwin|android|ios|iosemu|web> # default: current
+		a|arch:<x32|x64|arm|arm64|wasm> # default: current
+		m|mode:<debug|release|release-min|release-fast|release-0|release-3> # default: debug
+	# platform dependent (ext)
+		# windows runtime library linking mode
+		wr:<
+			ANY # default
+			MT_RELEASE|MT_DEBUG|MT_X # static
+			MD_RELEASE|MD_DEBUG|MD_X # dynamic
+		>
+		# ios|mac gui bundle identifier
+		b|bundle:<com.org.product>
+		# SDK version
+		s|sdk:<
+			19+          # android, default: 24
+			8.0|8.1|10.0 # UWP, default: 10.0
+		>
