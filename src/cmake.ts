@@ -266,7 +266,7 @@ const macTCpath = path.resolve(__dirname,"../rsc/mac/ios.toolchain.cmake");
 	['iosemu-arm64','SIMULATORARM64'],
 ].forEach((desc)=>{
 	getters.set(desc[0],async (x:CMakeTC)=>{
-		var t = await request("emsdk",true)
+		var t = await request("clang",true)
 		x.found = true;
 		x.config = async(target:def.TargetBuild, src:string, dst:string, args:string)=>{
 			if (target.mac_bundleGUI != "")
