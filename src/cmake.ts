@@ -271,7 +271,8 @@ const macTCpath = path.resolve(__dirname,"../rsc/mac/ios.toolchain.cmake");
 		x.config = async(target:def.TargetBuild, src:string, dst:string, args:string)=>{
 			if (target.mac_bundleGUI != "")
 				args = `-DMACOSX_BUNDLE_GUI_IDENTIFIER=${target.mac_bundleGUI} ` + args;
-			if ((await execPipedVerbose(`cmake -G Xcode -DCMAKE_TOOLCHAIN_FILE=${macTCpath} -DPLATFORM=${desc[1]} ` + args, dst))!=0)
+			//manual fix:SDK_VERSIO
+			if ((await execPipedVerbose(`cmake -G Xcode -DSDK_VERSION=12.1 -DCMAKE_TOOLCHAIN_FILE=${macTCpath} -DPLATFORM=${desc[1]} ` + args, dst))!=0)
 				throw "";
 		};
 		x.build = async (target:def.TargetBuild, dst:string, release:boolean)=>{

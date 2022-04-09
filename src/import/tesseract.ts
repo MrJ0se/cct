@@ -16,7 +16,7 @@ class LibImp extends Importer {
 	}
 	getOptions():Map<string,ImpOpt> {
 		var k = new Map<string,ImpOpt>();
-		//k.set("asm", {value:"true", values:["true", "false"], desc:"Build with x32 | x64 asm optimization"})
+		k.set("dynamic", {value:"false", values:["true", "false"], desc:"Build dynamic instead static library"});
 		return k;
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
@@ -31,23 +31,23 @@ class LibImp extends Importer {
 			return pic_inj.apply(text);
 		});
 		await this.buildProcess(async (clear:boolean)=>{
-			var lept_p = await this.requestLibraryDir(target, dst, 'leptonica', undefined, true);
-			var lept_inc = path.resolve(lept_p, 'include');
-			var lept_sta = path.resolve(lept_p, 'static');
-			lept_sta = path.resolve(lept_sta, fs.readdirSync(lept_sta)[0]);
+			var leptonica = this.getLibraryJSON(await this.requestLibraryDir(target, dst, 'leptonica', undefined, true));
 			await cmake.cmake(
 				target,
 				cmake_dir,
 				this.cache_bld,
 				[
+					//@ts-ignore
+					'-DBUILD_SHARED_LIBS='+((options.get('dynamic').value == 'true')?'ON':'OFF'),
+
 					'-DCMAKE_DISABLE_FIND_PACKAGE_TIFF=ON',
 					'-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON',
 					'-DDISABLE_CURL=ON',
 					'-DDISABLE_ARCHIVE=ON',
 					
 					'-DLeptonica_FOUND=ON',
-					'-DLeptonica_LIBRARIES='+lept_sta,
-					'-DLeptonica_INCLUDE_DIRS='+lept_inc,
+					'-DLeptonica_LIBRARIES='+leptonica.getLibraries(false).join(';'),
+					'-DLeptonica_INCLUDE_DIRS='+leptonica.inc,
 				],{
 					clear,
 					config:true,
@@ -74,14 +74,20 @@ class LibImp extends Importer {
 				file_filter:(x:string)=>files.filterName(x, ['*.h', '*.hpp']) && !files.filterName(x,'*config_auto*')
 			}
 		)
-		// static
-		await files.copy_recursive(
-			this.cache_bld, this.dst_static,
-			{
-				sub_folder_src:true, sub_folder_count:3, symlinks_raster:true,
-				file_filter:(x:string)=>files.filterName(x, ['*.a','*.lib']) && !files.filterName(x,'*foo*')
-			}
-		);
+		//@ts-ignore
+		if ((options.get('dynamic').value == 'true')) {
+			// dynamic
+			await files.copy_recursive(
+				this.cache_bld, this.dst_dynamic,
+				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) }
+			);
+		} else {
+			// static
+			await files.copy_recursive(
+				this.cache_bld, this.dst_static,
+				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.a','*.lib']), symlinks_raster:true }
+			);
+		}
 		this.genCMakeInclude("TESSERACT");
 	}
 }

@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 export async function main (...args:string[]) {
 	var args = args.map((v)=>path.resolve(v));
 	for (var i = 0; i < args.length; i++) {
@@ -29,19 +28,19 @@ function folder (p:string) {
 }
 function file(fp:string) {
 	var content = fs.readFileSync(fp, 'utf-8');
-	var needsv = false;
-
+	var content2 = apply(content);
+	if (content2 != content)
+		fs.writeFileSync(fp, content);
+}
+export function apply(content:string):string {
 	while (true) {
-		var i = content.search(/install(\s*\t*\n*)*\(/g);
-		if (i == -1)
+		var i = content.indexOf("install(");
+		if (i < 0)
 			break;
 		var i2 = content.indexOf(')', i);
-		if (i2 == -1)
+		if (i2 < 0)
 			break;
 		content = content.substr(0, i) + content.substr(i2+1);
-		needsv = true;
 	}
-
-	if (needsv)
-		fs.writeFileSync(fp, content);
+	return content;
 }

@@ -17,16 +17,16 @@ function dg_anim() {
 
 	var tstr = '';
 	for (var i = 0; i < 10; i++)
-		tstr += (i == dg_anim_state)?'=':' ';
+		tstr += (i == index)?'=':' ';
 	//@ts-ignore
 	process.stdout.clearLine();
 	process.stdout.cursorTo(0);
 	process.stdout.write('['+tstr+']');
 }
 export async function download_git(repo:string, filepath_dest:string):Promise<void> {
-	console.log("Downloading (git clone ${repo})");
-	var anim = setTimeout(dg_anim, 33);
-	var res = exec.execGitClone(repo, filepath_dest);
+	console.log(`Downloading (git clone ${repo})`);
+	var anim = setInterval(dg_anim, 250);
+	var res = await exec.execGitClone(repo, filepath_dest);
 	clearTimeout(anim);
 	if (!res) {
 		console.log("Failed");
@@ -152,4 +152,5 @@ export async function download_source(file_path:string, source_dir:string, link:
 		await unzip(zipfile, source_dir);
 		fs.writeFileSync(source_dir+".ok","");
 	}
+	await new Promise((resolve)=>setTimeout(resolve, 500));
 }

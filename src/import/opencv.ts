@@ -16,6 +16,7 @@ class LibImp extends Importer {
 	}
 	getOptions():Map<string,ImpOpt> {
 		var k = new Map<string,ImpOpt>();
+		k.set("dynamic", {value:"false", values:["true", "false"], desc:"Build dynamic instead static library"});
 		return k;
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
@@ -27,7 +28,8 @@ class LibImp extends Importer {
 		})
 		await this.buildProcess(async (clear:boolean)=>{
 			var args:string[] = [
-				'-DBUILD_SHARED_LIBS=OFF',
+				//@ts-ignore
+				'-DBUILD_SHARED_LIBS='+((options.get('dynamic').value == 'true')?'ON':'OFF'),
 
 				'-DOPENCV_ENABLE_NONFREE=OFF',
 				'-DWITH_AVFOUNDATION=OFF',
@@ -103,11 +105,21 @@ class LibImp extends Importer {
 				{ file_filter:header_filter, sub_folder_count:5 }
 			);
 		}
-		// static
-		await files.copy_recursive(
-			this.cache_bld, this.dst_static,
-			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.a','*.lib']), symlinks_raster:true }
-		);
+
+		//@ts-ignore
+		if ((options.get('dynamic').value == 'true')) {
+			// dynamic
+			await files.copy_recursive(
+				this.cache_bld, this.dst_dynamic,
+				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']), symlinks_raster:true }
+			);
+		} else {
+			// static
+			await files.copy_recursive(
+				this.cache_bld, this.dst_static,
+				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.a','*.lib']), symlinks_raster:true }
+			);
+		}
 		this.genCMakeInclude(
 			"OPENCV",
 			[

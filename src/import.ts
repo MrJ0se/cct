@@ -10,10 +10,53 @@ export interface ImpOpt {
 	value:string,
 	values?:string[],
 };
+class LibraryJSONUtil {
+	inc:string;
+	sta:string;
+	dyn:string;
+	l_sta?:string[];
+	l_dyn?:string[];
+
+	constructor (path_dir:string) {
+		this.inc = path.resolve(path_dir, 'include');
+		this.sta = path.resolve(path_dir, 'static');
+		this.dyn = path.resolve(path_dir, 'dynamic');
+		var p = path.resolve(path_dir, 'inc.json');
+		if (fs.existsSync(p)) {
+			var obj = JSON.parse(fs.readFileSync(p, 'utf-8'));
+			var stab = obj.static as (string[]|undefined);
+			var dynb = obj.dynamic as (string[]|undefined);
+			if (stab && stab.length > 0) this.l_sta = stab;
+			if (dynb && dynb.length > 0) this.l_dyn = dynb;
+		}
+	}
+	getLibraries(prefer_dynamic:boolean):string[] {
+		if (prefer_dynamic && this.l_dyn)
+			return this.l_dyn.map((x)=>path.resolve(this.dyn,x));
+		if (this.l_sta)
+			return this.l_sta.map((x)=>path.resolve(this.sta,x));
+		if (this.l_dyn)
+			return this.l_dyn.map((x)=>path.resolve(this.dyn,x));
+		throw 'Cant find any library';
+	}
+}
+export interface NewImporterOpts {
+	request_symlink?:{
+		download?:boolean,
+		source?:boolean,
+		build?:boolean
+	}
+}
 export class Importer {
+	getLibraryJSON(path_dir:string){
+		return new LibraryJSONUtil(path_dir);
+	}
 	name:string;
-	constructor(name:string) {
+	opts:NewImporterOpts = {};
+	constructor(name:string, opts?:NewImporterOpts) {
 		this.name = name;
+		if (opts)
+			this.opts = opts;
 	}
 	cache_file:string = "";
 	cache_src:string = "";
@@ -37,9 +80,21 @@ export class Importer {
 		this.dst_inc = path.resolve(dst, uname, "include");
 		this.dst_static = path.resolve(dst, uname, "static");
 		this.dst_dynamic = path.resolve(dst, uname, "dynamic");
-		this.cache_file = path.resolve(def.cacheDirDownload, unamev);
-		this.cache_src = path.resolve(def.cacheDirSource, unamev);
-		this.cache_bld = path.resolve(def.cacheDirBuild, uname, this.hashConfig(target, options));
+		this.cache_file = path.resolve(
+			(this.opts.request_symlink && this.opts.request_symlink.download && !def.cacheSupportSymlink)?
+				def.tcacheDirDownload:def.cacheDirDownload,
+			unamev
+		);
+		this.cache_src = path.resolve(
+			(this.opts.request_symlink && this.opts.request_symlink.source && !def.cacheSupportSymlink)?
+				def.tcacheDirSource:def.cacheDirSource,
+			unamev
+		);
+		this.cache_bld = path.resolve(
+			(this.opts.request_symlink && this.opts.request_symlink.build && !def.cacheSupportSymlink)?
+				def.tcacheDirBuild:def.cacheDirBuild,
+			unamev
+		);
 	}
 	//utils
 	hashConfig(target:def.TargetBuild, options:Map<string,ImpOpt>):string {
@@ -91,7 +146,6 @@ export class Importer {
 		return path.resolve(dst, libname, version, triple);
 	}
 	async downloadSource(link:string, type:"git"|"tar.gz"|"tar.xz"):Promise<void> {
-		crypto
 		await download.download_source(this.cache_file, this.cache_src, link, type, this.purge);
 	}
 	async buildProcess(build_func:(need_clear:boolean)=>Promise<void>) {
@@ -117,7 +171,14 @@ export class Importer {
 			fs.writeFileSync(pf, await doper(
 				fs.readFileSync(pf, 'utf-8')
 			));
-			fs.writeFileSync(pf_ok, "");
+			fs.writeFileSync(pf_ok, '');
+		}
+	}
+	async dopeState(pf:string, doper:()=>Promise<void>):Promise<void> {
+		var pf_ok = pf+".ok";
+		if (!fs.existsSync(pf_ok)) {
+			await doper();
+			fs.writeFileSync(pf_ok, '')
 		}
 	}
 	genCMakeInclude(name:string, order?:{op:ReorderOp, filter:string[]|string}[]) {
@@ -143,6 +204,12 @@ export class Importer {
 			text += `set(${name}_DYNAMIC_CPY ${dynamic_copy.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/dynamic/'+x).join(' ')})\n`;
 		}
 		fs.writeFileSync(path.resolve(this.dst_inc, '../inc.cmake'), text);
+		var json_save:any = {
+			static:static_libs,
+			dynamic:dynamic_libs,
+			dynamic_copy
+		};
+		fs.writeFileSync(path.resolve(this.dst_inc, '../inc.json'), JSON.stringify(json_save));
 	}
 };
 export enum ReorderOp {
@@ -169,9 +236,9 @@ function reorderLib(list:string[], order?:{op:ReorderOp, filter:string[]|string}
 			}
 		});
 
-		nlist.filter((x, i)=>{
+		nlist = nlist.filter((x, i)=>{
 			i--;
-			for (;i>0;i--) {
+			for (;i>=0;i--) {
 				if (x == nlist[i])
 					return false;
 			}

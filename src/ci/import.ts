@@ -71,7 +71,7 @@ export async function execute(args:string[], offset:number) {
 		Array.from(lib_prefs.keys()).forEach((key)=>{
 			var pref = lib_prefs.get(key) as importer.ImpOpt;
 			if (pref.values) {
-				var form_el = createCBwith(`(lo-)${key}:`, pref.values, pref.value);
+				var form_el = createCBwith(`(lo-)${key}`, pref.values, pref.value);
 				ui_lo.set(key, form_el);
 				form.add(form_el);
 			} else {
@@ -109,6 +109,7 @@ export async function execute(args:string[], offset:number) {
 	//========//
 	//@ts-ignore
 	var target = new def.TargetBuild({platform:cmake.current_platform, arch:cmake.current_arch});
+	target.mode = def.BuildMode.RELEASE_FASTER;
 	var dst = `.`;
 
 	for (var i = offset; i < args.length; i++) {

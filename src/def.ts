@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import * as files from './u/files';
+import * as os from 'os';
 
 
 export enum ColorCode {
@@ -147,7 +148,29 @@ export class Tool {
 	}
 };
 export var cacheDir = path.resolve(__dirname,'../cache');
-export var cacheDirMeta = path.resolve(__dirname,'../cache/meta',process.platform);
+export var cacheDirMeta = path.resolve(__dirname,'../cache/meta', process.platform);
 export var cacheDirDownload = path.resolve(__dirname,'../cache/download');
 export var cacheDirSource = path.resolve(__dirname,'../cache/source');
 export var cacheDirBuild = path.resolve(__dirname,'../cache/build');
+
+var _tmp = path.resolve(os.tmpdir(),'.cct_cache');
+export var tcacheDir = _tmp;
+export var tcacheDirMeta = path.resolve(_tmp,'meta', process.platform);
+export var tcacheDirDownload = path.resolve(_tmp,'download');
+export var tcacheDirSource = path.resolve(_tmp,'source');
+export var tcacheDirBuild = path.resolve(_tmp,'build');
+
+function testCacheSymlink(local:string):boolean {
+	var lresult = path.resolve(local, 'symtest.txt');
+	var link = path.resolve(local, 'symtest');
+	if (fs.existsSync(lresult))
+		return fs.readFileSync(lresult, 'utf-8') == "true";
+	var test = true;
+	try { fs.symlinkSync('/test', link); } catch(e) { test = false; }
+	if (fs.existsSync(link))
+		fs.unlinkSync(link);
+	fs.writeFileSync(lresult, test?'true':'false');
+	return test;
+}
+
+export var cacheSupportSymlink = testCacheSymlink(cacheDir);

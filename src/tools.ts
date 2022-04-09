@@ -33,7 +33,41 @@ export async function request(name:string, fail_on_falt:boolean):Promise<Tool|un
 		throw `Required tool not found: ${name}`;
 	return undefined;
 }
+export function getAppFullpath(name:string|string[]):string {
+	if (typeof(name) == 'string')
+		name = [name];
+	var r = '';
+	for (var i = 0; i < name.length && r == ''; i++) {
+		if (process.platform == 'win32') {
+			//@ts-ignore
+			(process.env.path.split(';') as string[])
+			.find((x)=>['exe','bat','cmd'].find((y)=>{
+				var p = path.resolve(x, name[i]+'.'+y);
+				if (fs.existsSync(p)) {
+					r = p;
+					return true;
+				}
+				return false;
+			}) !=null);
+		} else {
+			var p = '/usr/bin:usr/local/bin';
+			var pl = process.env.path;
+			if (pl && pl.length > 0)
+				p += ':'+pl;
 
+			(p.split(':') as string[])
+			.find((x)=>{
+				var p = path.resolve(x, name[i]);
+				if (fs.existsSync(p)) {
+					r = p;
+					return true;
+				}
+				return false;
+			});
+		}
+	}
+	return r;
+}
 
 getters.set("cmake",async (r:Tool)=>{
 	r.found = await execNoError("cmake --version");

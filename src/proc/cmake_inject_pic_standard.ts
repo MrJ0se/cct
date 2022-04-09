@@ -6,7 +6,7 @@ export const lineCMakeArgs = [
 	'-DCMAKE_CXX_STANDARD_REQUIRED=ON',
 	'-DCMAKE_CXX_STANDARD=14',
 	'-DCMAKE_C_STANDARD_REQUIRED=ON',
-	'-DCMAKE_C_STANDARD=11',
+	'-DCMAKE_C_STANDARD=14',
 	'-DCMAKE_POSITION_INDEPENDENT_CODE=ON'
 ];
 export async function main (...args:string[]) {
