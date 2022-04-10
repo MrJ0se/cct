@@ -9,7 +9,7 @@ import {execNoError} from '../u/exec';
 import * as fs from 'fs';
 
 export function getImporter():Importer {
-	return new LibImp("aom");
+	return new LibImp("aom", {request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {

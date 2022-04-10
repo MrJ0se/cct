@@ -73,10 +73,10 @@ export async function execute(args:string[], offset:number) {
 			if (pref.values) {
 				var form_el = createCBwith(`(lo-)${key}`, pref.values, pref.value);
 				ui_lo.set(key, form_el);
-				form.add(form_el);
+				form.add(form_el, (new UI.Element()).setLabel('*'+pref.desc));
 			} else {
 				var form_el = (new UI.Element()).setInput(pref.value);
-				form.add((new UI.Element()).setLabel(`(lo-)${key}:`), form_el);
+				form.add((new UI.Element()).setLabel(`(lo-)${key}:`), form_el, (new UI.Element()).setLabel('*'+pref.desc))
 				ui_lo.set(key, form_el);
 			}
 		});

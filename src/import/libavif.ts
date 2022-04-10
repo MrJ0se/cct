@@ -7,7 +7,7 @@ import * as pic_inj from '../proc/cmake_inject_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
-	return new LibImp("libavif");
+	return new LibImp("libavif", {request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {

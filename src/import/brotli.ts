@@ -56,7 +56,7 @@ class LibImp extends Importer {
 		// dynamic
 		await files.copy_recursive(
 			this.cache_bld, this.dst_dynamic,
-			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']) }
+			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']), symlinks_raster:true }
 		);
 		this.genCMakeInclude("BROTLI");
 	}

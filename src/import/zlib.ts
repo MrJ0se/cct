@@ -7,7 +7,7 @@ import * as pic_inj from '../proc/cmake_inject_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
-	return new LibImp("zlib");
+	return new LibImp("zlib", {request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {
@@ -68,7 +68,7 @@ class LibImp extends Importer {
 		// dynamic
 		await files.copy_recursive(
 			this.cache_bld, this.dst_dynamic,
-			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']) }
+			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']), symlinks_raster:true }
 		);
 		this.genCMakeInclude("ZLIB");
 	}

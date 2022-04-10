@@ -16,7 +16,7 @@ class LibImp extends Importer {
 	}
 	getOptions():Map<string,ImpOpt> {
 		var k = new Map<string,ImpOpt>();
-		//k.set("asm", {value:"true", values:["true", "false"], desc:"Build with x32 | x64 asm optimization"})
+		k.set("asm", {value:"true", values:["true", "false"], desc:"Build with asm optimization"})
 		return k;
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
@@ -53,7 +53,8 @@ class LibImp extends Importer {
 				'-DENABLE_NC=OFF',
 				'-DUSE_STATIC_MSVC_RUNTIMES=OFF'
 			];
-			if ([def.Platform.MAC, def.Platform.IOS, def.Platform.IOS_EMU, def.Platform.WEB].find((x)=>x==target.target.platform)!=null)
+			//@ts-ignore
+			if (options.get('asm').value!='true'||[def.Platform.MAC, def.Platform.IOS, def.Platform.IOS_EMU, def.Platform.WEB].find((x)=>x==target.target.platform)!=null)
 				args.push('-DENABLE_ASM=OFF');
 			if (target.target.platform == def.Platform.WEB)
 				args.push('-DCMAKE_C_FLAGS="-D__linux__"');

@@ -25,6 +25,14 @@ class LibImp extends Importer {
 		var cmake_file = path.resolve(cmake_dir, 'CMakeLists.txt');
 		if (!fs.existsSync(cmake_file))
 			fs.writeFileSync(cmake_file, GIFLIB_CMAKE);
+		await this.dopeFile(path.resolve(cmake_dir, 'gif_hash.h'),
+			async (text)=>text.replace('#include <unistd.h>',
+`#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif`
+			));
 
 		await this.buildProcess(async (clear:boolean)=>{
 			await cmake.cmake(

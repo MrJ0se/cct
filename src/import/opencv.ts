@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export function getImporter():Importer {
-	return new LibImp("opencv");
+	return new LibImp("opencv", {request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {

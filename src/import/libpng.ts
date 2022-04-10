@@ -6,7 +6,7 @@ import * as pic_inj from '../proc/cmake_inject_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
-	return new LibImp("libpng");
+	return new LibImp("libpng", {request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {
@@ -25,7 +25,7 @@ class LibImp extends Importer {
 		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
 			return pic_inj.apply(text
 				//remove math library from linker (avoid gnu std)
-				.replace('find_library(M_LIBRARY m)','set(M_LIBRARY "")#edited by cct2')
+				//.replace('find_library(M_LIBRARY m)','set(M_LIBRARY "m")#edited by cct2')
 				//force to use precompiled configure header, awk = bug
 				.replace('find_program(AWK NAMES gawk awk)','#removed find awk by cct2')
 				//compatible with multiple zlib... one specific for static lib
@@ -85,7 +85,7 @@ class LibImp extends Importer {
 		// dynamic
 		await files.copy_recursive(
 			this.cache_bld, this.dst_dynamic,
-			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']) }
+			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']), symlinks_raster:true }
 		);
 		this.genCMakeInclude("LIBPNG");
 	}

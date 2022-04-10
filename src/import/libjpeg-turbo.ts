@@ -7,7 +7,7 @@ import * as remove_install from '../proc/cmake_remove_install';
 import * as path from 'path';
 
 export function getImporter():Importer {
-	return new LibImp("libjpeg-turbo");
+	return new LibImp("libjpeg-turbo", {request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {
@@ -101,7 +101,7 @@ class LibImp extends Importer {
 		// dynamic
 		await files.copy_recursive(
 			this.cache_bld, this.dst_dynamic,
-			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']) }
+			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']), symlinks_raster:true }
 		);
 		this.genCMakeInclude("LIBJPEG_TURBO");
 	}

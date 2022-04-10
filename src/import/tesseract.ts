@@ -8,7 +8,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export function getImporter():Importer {
-	return new LibImp("tesseract");
+	return new LibImp("tesseract",{request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {
@@ -79,7 +79,7 @@ class LibImp extends Importer {
 			// dynamic
 			await files.copy_recursive(
 				this.cache_bld, this.dst_dynamic,
-				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) }
+				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']), symlinks_raster:true }
 			);
 		} else {
 			// static
