@@ -103,6 +103,6 @@ class LibImp extends Importer {
 			this.cache_bld, this.dst_dynamic,
 			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']) }
 		);
-		this.genCMakeInclude("PNG");
+		this.genCMakeInclude("LIBJPEG_TURBO");
 	}
 }

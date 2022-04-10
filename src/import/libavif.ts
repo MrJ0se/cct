@@ -90,6 +90,6 @@ class LibImp extends Importer {
 				this.cache_bld, this.dst_static,
 				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.a','*.lib']), symlinks_raster:true }
 			);
-		this.genCMakeInclude("AVIF");
+		this.genCMakeInclude("LIBAVIF");
 	}
 }

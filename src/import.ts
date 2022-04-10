@@ -75,7 +75,7 @@ export class Importer {
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
 		this.purge = purge;
-		var unamev = this.name+'/'+version;
+		var unamev = this.name+'/'+version;	
 		var uname = unamev+"/"+def.Target_join(target.target);
 		this.dst_inc = path.resolve(dst, uname, "include");
 		this.dst_static = path.resolve(dst, uname, "static");
@@ -93,7 +93,7 @@ export class Importer {
 		this.cache_bld = path.resolve(
 			(this.opts.request_symlink && this.opts.request_symlink.build && !def.cacheSupportSymlink)?
 				def.tcacheDirBuild:def.cacheDirBuild,
-			unamev
+			uname, this.hashConfig(target, options)
 		);
 	}
 	//utils
@@ -181,7 +181,7 @@ export class Importer {
 			fs.writeFileSync(pf_ok, '')
 		}
 	}
-	genCMakeInclude(name:string, order?:{op:ReorderOp, filter:string[]|string}[]) {
+	genCMakeInclude(name:string, order?:{op:ReorderOp, filter:string[]|string}[], additional_cmake?:string) {
 		var text = `set(${name}_INC \${CMAKE_CURRENT_LIST_DIR}/include)\n`;
 		var static_libs:string[] = [];
 		var dynamic_libs:string[] = [];
@@ -203,6 +203,8 @@ export class Importer {
 			text += `set(${name}_DYNAMIC ${dynamic_libs.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/dynamic/'+x).join(' ')})\n`;
 			text += `set(${name}_DYNAMIC_CPY ${dynamic_copy.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/dynamic/'+x).join(' ')})\n`;
 		}
+		if (additional_cmake)
+			text += '\n'+additional_cmake;
 		fs.writeFileSync(path.resolve(this.dst_inc, '../inc.cmake'), text);
 		var json_save:any = {
 			static:static_libs,
