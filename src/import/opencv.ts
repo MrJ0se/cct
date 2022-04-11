@@ -23,9 +23,18 @@ class LibImp extends Importer {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource(`https://github.com/opencv/opencv/archive/refs/tags/${version}.tar.gz`, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, `opencv-${version}`);
-		await this.dopeFile(path.resolve(cmake_dir, 'cmake/OpenCVFindLibsGUI.cmake'), async(text:string)=>{
-			return text.replace('set(HAVE_COCOA YES)','#set(HAVE_COCOA YES)');
-		})
+		await this.dopeFile(path.resolve(cmake_dir, 'cmake/OpenCVFindLibsGUI.cmake'), async(text:string)=>
+			text.replace('set(HAVE_COCOA YES)','#set(HAVE_COCOA YES)')
+		);
+		await this.dopeFile(path.resolve(cmake_dir, 'cmake/OpenCVCompilerOptions.cmake'), async(text:string)=>
+			text.replace('set(_option "-Wl,--as-needed")',
+`if(APPLE)
+	set(_option "-Wl")
+else()
+	set(_option "-Wl,--as-needed")
+endif()`
+			)
+		);
 		await this.buildProcess(async (clear:boolean)=>{
 			var args:string[] = [
 				//@ts-ignore

@@ -29,6 +29,9 @@ class LibImp extends Importer {
 			remove_install.main(cmake_dir);
 			return remove_install.apply(pic_inj.apply(text));
 		});
+		await this.dopeFile(path.resolve(cmake_dir, 'sharedlib/CMakeLists.txt'), async (text)=>
+			remove_install.apply(text)
+		);
 		//to try after: fix turbo-jpeg compilation (linker errors can be resolved in windows with: (library) vcruntime)
 		/*await this.dopeFile(path.resolve(cmake_dir, 'tjutil.h'), async (text)=>{
 			var i = text.indexOf('_snprintf_s');
