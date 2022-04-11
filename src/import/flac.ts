@@ -23,7 +23,11 @@ class LibImp extends Importer {
 		await this.downloadSource('https://codeload.github.com/janbar/flac-cmake/tar.gz/refs/tags/'+version, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, 'flac-cmake-'+version);
 		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return pic_inj.apply(text);
+			return pic_inj.apply(text).replace('test_big_endian(CPU_IS_BIG_ENDIAN)',
+`if (NOT EMSCRIPTEN)
+  test_big_endian(CPU_IS_BIG_ENDIAN)
+endif()`
+			);
 		});
 		await this.dopeFile(path.resolve(cmake_dir, 'src/libFLAC/cpu.c'), async (text)=>{
 			return cpu_wasm_fix.replace('%CONTENT%', text);

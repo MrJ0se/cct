@@ -30,6 +30,9 @@ class LibImp extends Importer {
 				.replace('find_package(Leptonica ${MINIMUM_LEPTONICA_VERSION} CONFIG)', '');
 			return pic_inj.apply(text);
 		});
+		await this.dopeFile(path.resolve(cmake_dir, 'src/arch/simddetect.cpp'), async (text)=>
+			text.replace(/(defined\(HAS_CPUID\))/g,'defined(HAS_CPUID) && !defined(__EMSCRIPTEN__)')
+		);
 		await this.buildProcess(async (clear:boolean)=>{
 			var leptonica = this.getLibraryJSON(await this.requestLibraryDir(target, dst, 'leptonica', undefined, true));
 			await cmake.cmake(
@@ -44,6 +47,7 @@ class LibImp extends Importer {
 					'-DCMAKE_DISABLE_FIND_PACKAGE_PkgConfig=ON',
 					'-DDISABLE_CURL=ON',
 					'-DDISABLE_ARCHIVE=ON',
+					'-DINSTALL_CONFIGS=OFF',
 					
 					'-DLeptonica_FOUND=ON',
 					'-DLeptonica_LIBRARIES='+leptonica.getLibraries(false).join(';'),

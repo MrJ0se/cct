@@ -68,6 +68,8 @@ class LibImp extends Importer {
 				'-DENABLE_AVX='+(optime_level>=2?'ON':'OFF'),
 				'-DENABLE_AVX2='+(optime_level>=2?'ON':'OFF'),
 			];
+			if (target.target.platform == def.Platform.WEB)
+				args.push('-DAOM_TARGET_CPU=generic')
 
 			if (process.platform == 'win32') {
 				args.push(

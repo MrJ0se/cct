@@ -4,28 +4,30 @@ Status:
 - ✅ ok
 - ❌ fail
 - ⚙️ fail, but rest some tries
-- ☢ not designed for this platform
+- ☢ incompatible
 
 | | ![Windows](./md/win.png) | ![Linux](./md/lnx.png) | ![MacOS](./md/mac.png) | ![Android](./md/and.png) | ![IOS](./md/ios.png) | ![WEB](./md/asm.png) | ![UWP/XBOX](./md/xbx.png) | ![Arduino](./md/ard.png) | obs. |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **Codecs**     | -- | -- | -- | -- | -- | -- | -- | -- | |
-| libpng         | ✅ | ✅ | ✅ |    |    |    | ✅ |    | |
-| libjpeg-turbo  | 🔨 | ✅ | ✅ |    |    |    | 🔨 |    | win/uwp: no turbo/SIMD, static only |
-| giflib         | ✅ | ✅ | ✅ |    |    |    | ⚙️ |    | uwp: win only file api |
-| libwebp        | ✅ | ✅ | ✅ |    |    |    | ✅ |    | |
-| aom            | ✅ | ✅ | 🔨 |    |    |    | ⚙️ |    | mac: static only. uwp: aom\av1\encoder\interp_search.c(472): error C4703: possible uninitied variable 'switchable_interp_p0' |
-| libavif        | ✅ | ✅ | 🔨 |    |    |    |    |    | mac: static only |
-| opus           | ✅ | ✅ | ✅ |    |    |    | ✅ |    | |
-| flac           | ✅ | ✅ | ✅ |    |    |    | ⚙️ |    | uwp: need a workaround: some function renames. |
+| libpng         | ✅ | ✅ | ✅ |    |    | ✅ | ✅ |    | |
+| libjpeg-turbo  | 🔨 | ✅ | ✅ |    |    | 🔨 | 🔨 |    | win/web/uwp: no turbo/SIMD, static only |
+| giflib         | ✅ | ✅ | ✅ |    |    | ✅ | ⚙️ |    | uwp: win only file api |
+| libwebp        | ✅ | ✅ | ✅ |    |    | ✅ | ✅ |    | |
+| aom            | ✅ | ✅ | 🔨 |    |    | ✅ | ⚙️ |    | mac: static only. uwp: aom\av1\encoder\interp_search.c(472): error C4703: possible uninitied variable 'switchable_interp_p0' |
+| libavif        | ✅ | ✅ | 🔨 |    |    | ✅ |    |    | mac: static only |
+| opus           | ✅ | ✅ | ✅ |    |    | ✅ | ✅ |    | |
+| flac           | ✅ | ✅ | ✅ |    |    | ✅ | ⚙️ |    | uwp: need a workaround: some function renames. |
 | **Vision**     | -- | -- | -- | -- | -- | -- | -- | -- | |
-| opencv         | ✅ | ✅ | ✅ |    |    |    | ⚙️ |    | mac: static only. uwp: broken cmake file |
-| leptonica      | ✅ | ✅ | ✅ |    |    |    | ⚙️ |    | uwp: win only file api |
-| tesseract      | ✅ | ✅ | ✅ |    |    |    |    |    | |
+| opencv         | ✅ | ✅ | ✅ |    |    | ✅ | ⚙️ |    | uwp: broken cmake file |
+| leptonica      | ✅ | ✅ | ✅ |    |    | ✅ | ⚙️ |    | uwp: win only file api |
+| tesseract      | ✅ | ✅ | ✅ |    |    | ✅ |    |    | |
 | **Basic**      | -- | -- | -- | -- | -- | -- | -- | -- | |
-| zlib           | ✅ | ✅ | ✅ |    |    |    | ✅ |    | |
-| brotli         | ✅ | ✅ | ✅ |    |    |    | ✅ |    | |
-| sqlite         | ✅ | ✅ | ✅ |    |    |    | ☢ |    | uwp: win only api |
-| libreSSL       | ✅ | ✅ | ✅ |    |    |    | ✅ |    | |
+| zlib           | ✅ | ✅ | ✅ |    |    | 🔨 | ✅ |    | |
+| brotli         | ✅ | ✅ | ✅ |    |    | ✅ | ✅ |    | |
+| sqlite         | ✅ | ✅ | ✅ |    |    | ✅ | ☢ |    | uwp: win only api |
+| libreSSL       | ✅ | ✅ | ✅ |    |    | 🔨 | ✅ |    | |
+
+- \*obs.: disable any optimization, and static build for web compilations
 
 ## Compilation tips:
 ### windows:

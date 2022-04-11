@@ -33,8 +33,40 @@ class LibImp extends Importer {
 else()
 	set(_option "-Wl,--as-needed")
 endif()`
-			)
+			).replace(/(add_extra_compiler_option\(\-Werror\))/g, '')
 		);
+		{
+			var itt_notify = path.resolve(cmake_dir, '3rdparty/ittnotify/src/ittnotify/ittnotify_config.h');
+			if (fs.existsSync(itt_notify))
+				await this.dopeFile(itt_notify, async (text:string)=>
+					text.replace(
+`ITT_INLINE long
+__itt_interlocked_increment(volatile long* ptr) ITT_INLINE_ATTRIBUTE;
+ITT_INLINE long __itt_interlocked_increment(volatile long* ptr)
+{
+    return __TBB_machine_fetchadd4(ptr, 1) + 1L;
+}`,
+`#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wimplicit-function-declaration"
+ITT_INLINE long
+__itt_interlocked_increment(volatile long* ptr) ITT_INLINE_ATTRIBUTE;
+ITT_INLINE long __itt_interlocked_increment(volatile long* ptr)
+{
+    return __TBB_machine_fetchadd4(ptr, 1) + 1L;
+}
+#pragma clang diagnostic pop`)
+				);
+		}
+		{
+			var intrin = path.resolve(cmake_dir, 'modules/core/include/opencv2/core/hal/intrin.hpp');
+			if (fs.existsSync(intrin))
+				await this.dopeFile(intrin, async (text:string)=>
+					text.replace('#ifdef CV_DOXYGEN',
+`#undef CV_WASM_SIMD
+#ifdef CV_DOXYGEN`
+					)
+				);
+		}
 		await this.buildProcess(async (clear:boolean)=>{
 			var args:string[] = [
 				//@ts-ignore
@@ -79,6 +111,11 @@ endif()`
 				'-DBUILD_KOTLIN_EXTENSIONS=OFF',
 				'-DINSTALL_BIN_EXAMPLES=OFF',
 			];
+			if (target.target.platform == def.Platform.WEB) {
+				args.push(
+					'-DOPENCV_SKIP_EXTRA_COMPILER_FLAGS=ON'
+				);
+			}
 			await cmake.cmake(
 				target,
 				cmake_dir,

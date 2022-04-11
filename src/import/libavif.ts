@@ -23,7 +23,10 @@ class LibImp extends Importer {
 		await this.downloadSource(`https://github.com/AOMediaCodec/libavif/archive/refs/tags/v${version}.tar.gz`, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, 'libavif-'+version);
 		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return pic_inj.apply(text);
+			return pic_inj.apply(text)
+				//emscripten fix
+				.replace('set(CMAKE_C_STANDARD 99)','#set(CMAKE_C_STANDARD 99)')
+				.replace('include(CheckCCompilerFlag)','#include(CheckCCompilerFlag)');
 		});
 		//@ts-ignore
 		var dyn = (options.get('dynamic').value == 'true');
@@ -41,7 +44,9 @@ class LibImp extends Importer {
 				'-DAOM_FOUND=ON',
 				'-DAOM_INCLUDE_DIR='+aom.inc,
 				'-DAOM_LIBRARY='+aom_lib.join(';'),
-				'-DBUILD_SHARED_LIBS='+(dyn?'ON':'OFF')
+				'-DBUILD_SHARED_LIBS='+(dyn?'ON':'OFF'),
+				//as a emscripten fix mainly
+				'-DAVIF_ENABLE_WERROR=OFF'
 			];
 			if (yuv_lib.length > 0)
 				args.push(

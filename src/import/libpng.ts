@@ -26,7 +26,11 @@ class LibImp extends Importer {
 		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
 			return remove_install.apply(pic_inj.apply(text
 				//remove math library from linker (avoid gnu std)
-				//.replace('find_library(M_LIBRARY m)','set(M_LIBRARY "m")#edited by cct2')
+				.replace('find_library(M_LIBRARY m)',
+` find_library(M_LIBRARY m)
+  if(NOT M_LIBRARY)
+    set(M_LIBRARY "")
+  endif()`)
 				//force to use precompiled configure header, awk = bug
 				.replace('find_program(AWK NAMES gawk awk)','#removed find awk by cct2')
 				//compatible with multiple zlib... one specific for static lib

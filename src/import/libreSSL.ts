@@ -36,6 +36,8 @@ class LibImp extends Importer {
 		});
 		await this.dopeFile(path.resolve(cmake_dir, 'crypto/compat/arc4random.c'), async (text)=>
 `#if defined(__EMSCRIPTEN__)
+//fix bug of undefined size_t of new (2022) emsdk
+#include <stdio.h>
 #include <sys/random.h>
 #endif
 `+text
