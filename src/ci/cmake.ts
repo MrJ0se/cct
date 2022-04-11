@@ -53,13 +53,22 @@ export async function execute(args:string[], offset:number) {
 					target.mode = ce.substring(di+1) as def.BuildMode;
 					break;
 				case "wr":
-					var content = ce.substring(di+1);
+					var content = ce.substring(di+1).toLowerCase();
 					var i = 0;
 					Object.values(def.win_Runtime).filter((x)=>typeof x == "string").forEach((x, ci)=>{
-						if (x == content)
+						if ((''+x).toLowerCase() == content)
 							i = ci;
 					});
 					target.win_runtime = i as def.win_Runtime;
+					break;
+				case "wsm":
+					var content = ce.substring(di+1).toLowerCase();
+					var i = 0;
+					Object.values(def.win_SpectreMitigation).filter((x)=>typeof x == "string").forEach((x, ci)=>{
+						if ((''+x).toLowerCase() == content)
+							i = ci;
+					});
+					target.win_spectreMitigation = i as def.win_SpectreMitigation;
 					break;
 				case "sdk":
 				case "s":
@@ -94,6 +103,7 @@ export async function execute(args:string[], offset:number) {
 
 		var cb_ext_and = createCBwith(' (sdk:|s:) Android API level', [19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35].map((x)=>x+""), target.and_sdk);
 		var cb_ext_win = (new UI.Element()).setCombobox(' (wr:) Windows Runtime Library', Object.values(def.win_Runtime).filter((x)=>typeof x == "string") as string[], target.win_runtime as number);
+		var cb_ext_wsm = (new UI.Element()).setCombobox(' (wsm:) Windows Spectre Mitigation', Object.values(def.win_SpectreMitigation).filter((x)=>typeof x == "string") as string[], target.win_spectreMitigation as number);
 		var cb_ext_uwp = createCBwith(' (sdk:|s:) UWP SDK version', Object.values(def.uwp_SDKVersion).filter((x)=>typeof x == "string" && x.indexOf('.')>0), target.uwp_sdk);
 		var tb_ext_mac = (new UI.Element()).setInput(target.mac_bundleGUI, "example: com.company.product");
 
@@ -113,6 +123,7 @@ export async function execute(args:string[], offset:number) {
 			(new UI.Element()).setLabel("=== Ext ==="),
 			cb_ext_and,
 			cb_ext_win,
+			cb_ext_wsm,
 			cb_ext_uwp,
 			(new UI.Element()).setLabel(" (bundle:|b:) Mac BundleUI:"),
 			tb_ext_mac,
@@ -140,8 +151,8 @@ export async function execute(args:string[], offset:number) {
 
 		//@ts-ignore
 		target.and_sdk = cb_ext_and.items[cb_ext_and.itemSelected];
-		//@ts-ignore
-		target.win_runtime = cb_ext_win.items[cb_ext_win.itemSelected];
+		target.win_runtime = cb_ext_win.itemSelected as def.win_Runtime;
+		target.win_spectreMitigation = cb_ext_wsm.itemSelected as def.win_SpectreMitigation;
 		//@ts-ignore
 		target.uwp_sdk = cb_ext_uwp.items[cb_ext_uwp.itemSelected];
 		target.mac_bundleGUI = tb_ext_mac.text;

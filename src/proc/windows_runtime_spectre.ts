@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as def from '../def';
 
-export async function main (runtime:def.win_Runtime, ...files:string[]) {
+export async function main (runtime:def.win_Runtime, sm:def.win_SpectreMitigation, ...files:string[]) {
 	if (runtime == def.win_Runtime.ANY)
 		return;
 	var args = files.map((v)=>path.resolve(v));
@@ -13,23 +13,24 @@ export async function main (runtime:def.win_Runtime, ...files:string[]) {
 			continue;
 		}
 		if (fs.lstatSync(p).isDirectory())
-			folder(runtime, p);
+			folder(runtime, sm, p);
 		else
-			file(runtime, p);
+			file(runtime, sm, p);
 	}
 }
-function folder (runtime:def. win_Runtime,p:string) {
+function folder (runtime:def.win_Runtime, sm:def.win_SpectreMitigation, p:string) {
 	fs.readdirSync(p).forEach((x) =>{
 		x = path.resolve(p, x);
 		if (fs.lstatSync(x).isDirectory()) {
-			folder(runtime, x);
+			folder(runtime, sm, x);
 			return;
 		}
 		if (path.extname(x) == ".vcxproj")
-			file(runtime, x);
+			file(runtime, sm, x);
 	});
 }
-function file (runtime:def.win_Runtime, fp:string) {
+//<=============== spectre mitigation option not implemented
+function file (runtime:def.win_Runtime, sm:def.win_SpectreMitigation, fp:string) {
 	var content = fs.readFileSync(fp, 'utf-8');
 	var needsv = false;
 

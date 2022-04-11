@@ -77,6 +77,12 @@ export enum uwp_SDKVersion {
 	SDK_8_1 = "8.1",
 	SDK_10 = "10.0",
 };
+export enum win_SpectreMitigation {
+	ANY = 0,
+	SM_ENABLED,
+	SM_DISABLED,
+}
+
 export interface Target {
 	platform:Platform,
 	arch:Arch,
@@ -96,6 +102,7 @@ export class TargetBuild {
 	mode:BuildMode = BuildMode.DEBUG;
 
 	win_runtime:win_Runtime = win_Runtime.ANY;
+	win_spectreMitigation:win_SpectreMitigation = win_SpectreMitigation.ANY;
 	mac_bundleGUI:string = "";
 	uwp_sdk:uwp_SDKVersion = uwp_SDKVersion.SDK_10;
 	and_sdk:string = "24";

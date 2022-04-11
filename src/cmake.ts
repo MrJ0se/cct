@@ -5,7 +5,7 @@ import * as path from 'path';
 import {execPipedVerbose, joinCommandLine} from './u/exec';
 import {request, requestMult} from './tools';
 
-import {main as runtime_fix} from './proc/windows_runtime';
+import {main as runtime_fix} from './proc/windows_runtime_spectre';
 import {main as uglify} from './proc/uglify';
 
 class CMakeTC {
@@ -202,7 +202,7 @@ getters.set('linux-arm64',async (x:CMakeTC)=>{
 			if ((await execPipedVerbose(`cmake -A ${varch} ` + args, dst))!=0)
 				throw "";
 			console.log('running post config runtime fix...');
-			runtime_fix(target.win_runtime, dst);
+			runtime_fix(target.win_runtime, target.win_spectreMitigation, dst);
 		};
 		x.build = async (target:def.TargetBuild, dst:string, release:boolean)=>{
 			if ((await execPipedVerbose(`cmake --build . --config ${release?'Release':'Debug'}`, dst))!=0)
@@ -214,12 +214,14 @@ getters.set('linux-arm64',async (x:CMakeTC)=>{
 		var t = await request("vc++",true);
 		x.found = true;
 		x.config = async(target:def.TargetBuild, src:string, dst:string, args:string)=>{
+			if ([def.win_Runtime.MD_X, def.win_Runtime.MD_RELEASE, def.win_Runtime.MD_DEBUG].find((x)=>x==target.win_runtime)==null)
+				throw "unsuported runtime link option for UWP, must be dynamicly linked (MD_X, MD_RELEASE, MD_DEBUG)";
 			if ((await execPipedVerbose(`cmake -A ${varch} -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=${target.uwp_sdk as string} ` + args, dst))!=0)
 				throw "";
 			if (target.win_runtime == def.win_Runtime.ANY)
 				target.win_runtime = def.win_Runtime.MD_X;
 			console.log('running post config runtime fix...');
-			runtime_fix(target.win_runtime, dst);
+			runtime_fix(target.win_runtime, target.win_spectreMitigation, dst);
 		};
 		x.build = async (target:def.TargetBuild, dst:string, release:boolean)=>{
 			if ((await execPipedVerbose(`cmake --build . --config ${release?'Release':'Debug'}`, dst))!=0)
