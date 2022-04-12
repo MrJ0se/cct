@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
@@ -13,22 +12,18 @@ class LibImp extends Importer {
 	getVersions():string[] {
 		return ["1.3.2-20191201"];
 	}
-	getOptions():Map<string,ImpOpt> {
-		var k = new Map<string,ImpOpt>();
-		//k.set("asm", {value:"true", values:["true", "false"], desc:"Build with x32 | x64 asm optimization"})
-		return k;
-	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource('https://codeload.github.com/janbar/flac-cmake/tar.gz/refs/tags/'+version, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, 'flac-cmake-'+version);
-		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return pic_inj.apply(text).replace('test_big_endian(CPU_IS_BIG_ENDIAN)',
+		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>
+			text.replace('test_big_endian(CPU_IS_BIG_ENDIAN)',
 `if (NOT EMSCRIPTEN)
   test_big_endian(CPU_IS_BIG_ENDIAN)
 endif()`
-			);
-		});
+			)
+		);
+		await this.dopeCmake(cmake_dir);
 		await this.dopeFile(path.resolve(cmake_dir, 'src/libFLAC/cpu.c'), async (text)=>{
 			return cpu_wasm_fix.replace('%CONTENT%', text);
 		});

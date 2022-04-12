@@ -9,23 +9,23 @@ Status:
 | | ![Windows](./md/win.png) | ![Linux](./md/lnx.png) | ![MacOS](./md/mac.png) | ![Android](./md/and.png) | ![IOS](./md/ios.png) | ![WEB](./md/asm.png) | ![UWP/XBOX](./md/xbx.png) | ![Arduino](./md/ard.png) | obs. |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **Codecs**     | -- | -- | -- | -- | -- | -- | -- | -- | |
-| libpng         | ✅ | ✅ | ✅ | ✅ |    | ✅ | ✅ |    | |
-| libjpeg-turbo  | 🔨 | ✅ | ✅ | ✅ |    | 🔨 | 🔨 |    | win/web/uwp: no turbo/SIMD, static only |
-| giflib         | ✅ | ✅ | ✅ | ✅ |    | ✅ | ⚙️ |    | uwp: win only file api |
-| libwebp        | ✅ | ✅ | ✅ | ✅ |    | ✅ | ✅ |    | |
-| aom            | ✅ | ✅ | 🔨 | ⚙️ |    | ✅ | ⚙️ |    | mac: static only. android: multiple wrong named neon SIMD functions. uwp: aom\av1\encoder\interp_search.c(472): error C4703: possible uninitied variable 'switchable_interp_p0' |
+| libpng         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    | |
+| libjpeg-turbo  | 🔨 | ✅ | ✅ | ✅ | ✅ | 🔨 | 🔨 |    | win/web/uwp: no turbo/SIMD, static only |
+| giflib         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚙️ |    | uwp: win only file api |
+| libwebp        | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    | |
+| aom            | ✅ | ✅ | 🔨 | ⚙️ | ⚙️ | ✅ | ⚙️ |    | mac: static only. android: multiple wrong named neon SIMD functions. uwp: aom\av1\encoder\interp_search.c(472): error C4703: possible uninitied variable 'switchable_interp_p0' |
 | libavif        | ✅ | ✅ | 🔨 |    |    | ✅ |    |    | mac: static only |
-| opus           | ✅ | ✅ | ✅ | ✅ |    | ✅ | ✅ |    | |
-| flac           | ✅ | ✅ | ✅ | ✅ |    | ✅ | ⚙️ |    | uwp: need a workaround: some function renames. |
+| opus           | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    | |
+| flac           | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚙️ |    | uwp: need a workaround: some function renames. |
 | **Vision**     | -- | -- | -- | -- | -- | -- | -- | -- | |
 | opencv         | ✅ | ✅ | ✅ | ✅ |    | ✅ | ⚙️ |    | uwp: broken cmake file |
-| leptonica      | ✅ | ✅ | ✅ | ✅ |    | ✅ | ⚙️ |    | uwp: win only file api |
-| tesseract      | ✅ | ✅ | ✅ | ✅ |    | ✅ |    |    | |
+| leptonica      | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ⚙️ |    | uwp: win only file api |
+| tesseract      | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    |    | |
 | **Basic**      | -- | -- | -- | -- | -- | -- | -- | -- | |
 | zlib           | ✅ | ✅ | ✅ | ✅ | ✅ | 🔨 | ✅ |    | |
 | brotli         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |    | |
-| sqlite         | ✅ | ✅ | ✅ | ✅ |    | ✅ | ☢ |    | uwp: win only api |
-| libreSSL       | ✅ | ✅ | ✅ | ✅ |    | 🔨 | ✅ |    | |
+| sqlite         | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |    | uwp: win only api |
+| libreSSL       | ✅ | ✅ | ✅ | ✅ | ✅ | 🔨 | ✅ |    | |
 
 - \*obs.: disable any optimization, and static build for web compilations
 
@@ -37,5 +37,7 @@ Status:
 ### IOS:
 - needs a team id specified, to get it, do a login in xcode, export the certified of team, get the number of Organization Unity / Unidade Empresarial of certify, and set on CCT.
 
-## Not implemented:
-- spectre mitigation option injection in vcprojects (proc/windows_runtime_spectre.ts).
+## To do (not implemented yet):
+- [ ] spectre mitigation option injection in vcprojects (proc/windows_runtime_spectre.ts).
+- [ ] replace hardcoded Apple SDK version in cmake.ts (use "xcrun --show-sdk-version" to get).
+- [ ] edit opencv script to use cct zlib instead clone zlib.

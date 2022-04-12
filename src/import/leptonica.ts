@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -22,8 +21,9 @@ class LibImp extends Importer {
 			var cutindex = text.indexOf('install(FILES');
 			if (cutindex > 0) text = text.substr(0,cutindex);
 			text = text.replace('sw" ON','sw" OFF').replace('if(NOT SW_BUILD)','if(ON)\nelseif(OFF)');
-			return pic_inj.apply(text);
+			return text;
 		});
+		await this.dopeCmake(cmake_dir);
 		await this.buildProcess(async (clear:boolean)=>{
 			await cmake.cmake(
 				target,

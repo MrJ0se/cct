@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 import {execNoError} from '../u/exec';
 import * as fs from 'fs';
@@ -15,17 +14,11 @@ class LibImp extends Importer {
 	getVersions():string[] {
 		return ["1.3.1"];
 	}
-	getOptions():Map<string,ImpOpt> {
-		var k = new Map<string,ImpOpt>();
-		return k;
-	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource(`https://archive.mozilla.org/pub/opus/opus-${version}.tar.gz`, 'tar.gz');
 		var cmake_dir = path.resolve(this.cache_src, 'opus-'+version);
-		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return pic_inj.apply(text);
-		});
+		await this.dopeCmake(cmake_dir);
 		{
 			//add missing file
 			var fixp = path.resolve(cmake_dir, 'opus_buildtype.cmake');

@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -23,6 +22,7 @@ class LibImp extends Importer {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource(`https://github.com/opencv/opencv/archive/refs/tags/${version}.tar.gz`, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, `opencv-${version}`);
+		await this.dopeCmake(cmake_dir);
 		await this.dopeFile(path.resolve(cmake_dir, 'cmake/OpenCVFindLibsGUI.cmake'), async(text:string)=>
 			text.replace('set(HAVE_COCOA YES)','#set(HAVE_COCOA YES)')
 		);

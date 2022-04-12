@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -26,10 +25,10 @@ class LibImp extends Importer {
 		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
 			var cutindex = text.indexOf('# EXECUTABLE tesseract');
 			if (cutindex > 0) text = text.substr(0,cutindex);
-			text = text.replace('sw" ON','sw" OFF')
+			return text.replace('sw" ON','sw" OFF')
 				.replace('find_package(Leptonica ${MINIMUM_LEPTONICA_VERSION} CONFIG)', '');
-			return pic_inj.apply(text);
 		});
+		await this.dopeCmake(cmake_dir);
 		await this.dopeFile(path.resolve(cmake_dir, 'src/arch/simddetect.cpp'), async (text)=>
 			text.replace(/(defined\(HAS_CPUID\))/g,'defined(HAS_CPUID) && !defined(__EMSCRIPTEN__)')
 		);

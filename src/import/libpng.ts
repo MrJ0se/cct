@@ -2,8 +2,6 @@ import {Importer,ImpOpt} from "../import";
 import * as def from '../def';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as remove_install from '../proc/cmake_remove_install';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
@@ -23,8 +21,8 @@ class LibImp extends Importer {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource(`https://codeload.github.com/glennrp/libpng/tar.gz/refs/tags/v${version}`, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, `libpng-${version}`);
-		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return remove_install.apply(pic_inj.apply(text
+		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>
+			text
 				//remove math library from linker (avoid gnu std)
 				.replace('find_library(M_LIBRARY m)',
 ` find_library(M_LIBRARY m)
@@ -35,8 +33,8 @@ class LibImp extends Importer {
 				.replace('find_program(AWK NAMES gawk awk)','#removed find awk by cct2')
 				//compatible with multiple zlib... one specific for static lib
 				.replace('target_link_libraries(png_static ${ZLIB_LIBRARY}','target_link_libraries(png_static ${ZLIB_LIBRARY_STATIC}')
-			));
-		});
+		);
+		await this.dopeCmake(path.resolve(cmake_dir));
 		await this.buildProcess(async (clear:boolean)=>{
 			var zlib = this.getLibraryJSON(await this.requestLibraryDir(target, dst, 'zlib', undefined, true));
 			var args:string[] = [

@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
@@ -15,19 +14,20 @@ class LibImp extends Importer {
 	}
 	getOptions():Map<string,ImpOpt> {
 		var k = new Map<string,ImpOpt>();
-		k.set('dynamic', {value:'true', values:['true','false'], desc:'Build dynamic instead static library'});
+		k.set('dynamic', {value:'false', values:['true','false'], desc:'Build dynamic instead static library'});
 		return k;
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource(`https://github.com/AOMediaCodec/libavif/archive/refs/tags/v${version}.tar.gz`, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, 'libavif-'+version);
-		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return pic_inj.apply(text)
+		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>
+			text
 				//emscripten fix
 				.replace('set(CMAKE_C_STANDARD 99)','#set(CMAKE_C_STANDARD 99)')
-				.replace('include(CheckCCompilerFlag)','#include(CheckCCompilerFlag)');
-		});
+				.replace('include(CheckCCompilerFlag)','#include(CheckCCompilerFlag)')
+		);
+		await this.dopeCmake(cmake_dir);
 		//@ts-ignore
 		var dyn = (options.get('dynamic').value == 'true');
 		await this.buildProcess(async (clear:boolean)=>{

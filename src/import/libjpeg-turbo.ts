@@ -2,7 +2,6 @@ import {Importer,ImpOpt} from "../import";
 import * as def from '../def';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as remove_install from '../proc/cmake_remove_install';
 import * as path from 'path';
 
@@ -25,10 +24,7 @@ class LibImp extends Importer {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource(`https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/${version}.tar.gz`, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, `libjpeg-turbo-${version}`);
-		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			remove_install.main(cmake_dir);
-			return remove_install.apply(pic_inj.apply(text));
-		});
+		await this.dopeCmake(cmake_dir);
 		await this.dopeFile(path.resolve(cmake_dir, 'sharedlib/CMakeLists.txt'), async (text)=>
 			remove_install.apply(text)
 		);

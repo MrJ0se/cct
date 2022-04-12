@@ -16,10 +16,6 @@ class LibImp extends Importer {
 	getVersions():string[] {
 		return ["1.0.9"];
 	}
-	getOptions():Map<string,ImpOpt> {
-		var k = new Map<string,ImpOpt>();
-		return k;
-	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource('https://codeload.github.com/google/brotli/tar.gz/refs/tags/v'+version, "tar.gz");

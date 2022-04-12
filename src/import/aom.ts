@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 import {execNoError} from '../u/exec';
 import * as fs from 'fs';
@@ -18,7 +17,7 @@ class LibImp extends Importer {
 	getOptions():Map<string,ImpOpt> {
 		var k = new Map<string,ImpOpt>();
 		k.set('optim', {value:'1', values:['0', '1', '2'], desc:'Optmization level'});
-		k.set('dynamic', {value:'true', values:['true','false'], desc:'Build dynamic instead static library'});
+		k.set('dynamic', {value:'false', values:['true','false'], desc:'Build dynamic instead static library'});
 		return k;
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
@@ -36,9 +35,7 @@ class LibImp extends Importer {
 			console.log('clearing source');
 			files.remove_recursive(git_repo);
 		}
-		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return pic_inj.apply(text);
-		});
+		await this.dopeCmake(cmake_dir);
 		await this.buildProcess(async (clear:boolean)=>{
 			//@ts-ignore
 			var optime_level = parseInt(options.get('optim').value);

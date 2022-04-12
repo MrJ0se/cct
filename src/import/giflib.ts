@@ -3,7 +3,6 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -13,10 +12,6 @@ export function getImporter():Importer {
 class LibImp extends Importer {
 	getVersions():string[] {
 		return ["5.2.1"];
-	}
-	getOptions():Map<string,ImpOpt> {
-		var k = new Map<string,ImpOpt>();
-		return k;
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
 		await super.import(target, version, options, dst, purge);

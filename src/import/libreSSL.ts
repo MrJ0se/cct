@@ -4,7 +4,6 @@ import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
 import * as exec from '../u/exec';
-import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
@@ -23,9 +22,10 @@ class LibImp extends Importer {
 		await super.import(target, version, options, dst, purge);
 		await this.downloadSource('https://codeload.github.com/libressl-portable/portable/tar.gz/refs/tags/v'+version, "tar.gz");
 		var cmake_dir = path.resolve(this.cache_src, 'portable-'+version);
-		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>{
-			return pic_inj.apply(text.replace('add_definitions(-Drestrict)',''));
-		});
+		await this.dopeFile(path.resolve(cmake_dir, 'CMakeLists.txt'), async (text)=>
+			text.replace('add_definitions(-Drestrict)','')
+		);
+		await this.dopeCmake(cmake_dir);
 		await this.dopeState(path.resolve(cmake_dir, 'sh'), async ()=>{
 			console.log('running autogen.sh');
 			if ((await exec.execPipedVerbose([tools.getAppFullpath(['sh','bash']), 'autogen.sh'], cmake_dir)) != 0) {
