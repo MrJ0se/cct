@@ -3,7 +3,7 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_inject_pic_standard';
+import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {

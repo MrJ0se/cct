@@ -25,6 +25,7 @@ export interface FilterPrefs {
 
 	symlinks_ignore?:boolean,
 	symlinks_raster?:boolean,
+	ignore_clone_libs?:boolean,
 
 	sub_folder_src?:boolean
 
@@ -53,8 +54,15 @@ async function testFilter(x:string, config?:FilterPrefs):Promise<boolean> {
 				config.sub_folder_count--;
 			if (config.folder_filter)
 				return config.folder_filter(x);
-		} else if (config.file_filter)
+		} else if (config.file_filter) {
+			if (config.ignore_clone_libs) {
+				if (isInNameVersionDylib(x))
+					return false;
+				if (path.basename(x).indexOf('__ignore__') == 0)
+					return false;
+			}
 			return config.file_filter(x);
+		}
 	}
 	return true;
 }
@@ -167,4 +175,10 @@ export function filterName(name:string, filter:string|string[]):boolean {
 		solved = ifind + ff[i].length;
 	}
 	return true;
+}
+export function isInNameVersionDylib(name:string) {
+	name = path.basename(name);
+	var li = name.lastIndexOf('.dylib');
+	var di = name.indexOf('.');
+	return li > 0 && di < li;
 }

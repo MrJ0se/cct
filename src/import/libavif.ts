@@ -3,7 +3,7 @@ import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_inject_pic_standard';
+import * as pic_inj from '../proc/cmake_pic_standard';
 import * as path from 'path';
 
 export function getImporter():Importer {
@@ -87,7 +87,7 @@ class LibImp extends Importer {
 			// dynamic
 			await files.copy_recursive(
 				this.cache_bld, this.dst_dynamic,
-				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']), symlinks_raster:true }
+				{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']), symlinks_raster:true, ignore_clone_libs:true }
 			);
 		else
 			// static

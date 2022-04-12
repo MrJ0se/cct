@@ -230,7 +230,7 @@ getters.set('linux-arm64',async (x:CMakeTC)=>{
 	});
 	//android
 	getters.set('android-'+arch,async (x:CMakeTC)=>{
-		var t = await request("vc++",true);
+		var t = await request("ndk",true);
 		//@ts-ignore
 		var toolchain = t.props.get('toolchain.cmake');
 		x.found = true;
@@ -273,6 +273,13 @@ const macTCpath = path.resolve(__dirname,"../rsc/mac/ios.toolchain.cmake");
 		x.config = async(target:def.TargetBuild, src:string, dst:string, args:string)=>{
 			if (target.mac_bundleGUI != "")
 				args = `-DMACOSX_BUNDLE_GUI_IDENTIFIER=${target.mac_bundleGUI} ` + args;
+			if (desc[0].substr(0,4) == 'ios-') {
+				var ios_dev_team_p = path.resolve(def.cacheDir, 'ios_dev_team.txt');
+				if (fs.existsSync(ios_dev_team_p))
+					args = `-DCMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM=${fs.readFileSync(ios_dev_team_p)} ` + args;
+				else
+					console.log(def.ColorCode.BgYellow + def.ColorCode.FgBlack + "[!] No Apple Dev Team ID specified [!]")
+			}
 			//manual fix:SDK_VERSIO
 			if ((await execPipedVerbose(`cmake -G Xcode -DSDK_VERSION=12.1 -DCMAKE_TOOLCHAIN_FILE=${macTCpath} -DPLATFORM=${desc[1]} ` + args, dst))!=0)
 				throw "";

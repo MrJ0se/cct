@@ -4,6 +4,11 @@ import * as files from './u/files';
 import * as def from './def';
 import * as download from './u/download'
 import * as crypto from 'crypto';
+//common effects applied to library cmake's
+import * as cmake_pic_std from './proc/cmake_pic_standard';
+import * as cmake_ignore_program from './proc/cmake_ignore_programs';
+import * as cmake_remove_install from './proc/cmake_remove_install';
+//===
 
 export interface ImpOpt {
 	desc:string,
@@ -165,11 +170,30 @@ export class Importer {
 			await build_func(false);
 		fs.writeFileSync(build_ok, "");
 	}
-	async dopeFile(pf:string, doper:(text:string)=>Promise<string>):Promise<void> {
+	async dopeCmake(pf:string) {
+		if (fs.existsSync(pf)) {
+			if (fs.statSync(pf).isDirectory()) {
+				pf = path.resolve(pf, 'CMakeLists.txt');
+				if (!fs.existsSync(pf))
+					return;
+			}
+			var pf_ok = pf+".cmake_ok";
+			if (!fs.existsSync(pf_ok)) {
+				fs.writeFileSync(pf,
+					cmake_ignore_program.apply(cmake_pic_std.apply(cmake_remove_install.apply(
+						fs.readFileSync(pf, 'utf-8')
+					)), pf)
+				);
+				fs.writeFileSync(pf_ok, '');
+			}
+		}
+	}
+	async dopeFile(pf:string, doper:(text:string, fp:string)=>Promise<string>):Promise<void> {
 		var pf_ok = pf+".ok";
 		if (!fs.existsSync(pf_ok)) {
 			fs.writeFileSync(pf, await doper(
-				fs.readFileSync(pf, 'utf-8')
+				fs.readFileSync(pf, 'utf-8'),
+				pf
 			));
 			fs.writeFileSync(pf_ok, '');
 		}

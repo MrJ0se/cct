@@ -19,6 +19,12 @@ interface Opt {
 }
 const opts:Opt[] = [
 	{long:"cmake",short:"c",desc:"Compile with CMake",next:cmake_exec},
+	{long:"set_apple_team_id",short:"set_team_id",desc:"Set Apple Team ID",next:async(args:string[], offset:number)=>{
+		var team_id = args[offset];
+		if (team_id == null)
+			team_id = await UI.getline("team id:", true);
+		fs.writeFileSync(path.resolve(def.cacheDir, 'ios_dev_team.txt'), team_id);
+	}},
 	{long:"import",short:"i",desc:"Import library ",next:import_exec},
 	{long:"tool",short:"t",desc:"Search tool",next:tools_exec},
 	{long:"purge-meta",short:"pm",desc:"Purge meta data of CCT cache",next:async()=>{
@@ -26,9 +32,8 @@ const opts:Opt[] = [
 	}},
 	{long:"webserver",short:"ws",desc:"Web Server for test wasm modules",next:async(args:string[], offset:number)=>{
 		var modulename = args[offset];
-		if (modulename == null) {
+		if (modulename == null)
 			modulename = await UI.getline("module name:", true);
-		}
 		runTestServer(modulename);
 		modulename = modulename.replace('.js','');
 		//keep running server

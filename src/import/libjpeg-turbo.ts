@@ -2,7 +2,7 @@ import {Importer,ImpOpt} from "../import";
 import * as def from '../def';
 import * as cmake from '../cmake';
 import * as files from '../u/files';
-import * as pic_inj from '../proc/cmake_inject_pic_standard';
+import * as pic_inj from '../proc/cmake_pic_standard';
 import * as remove_install from '../proc/cmake_remove_install';
 import * as path from 'path';
 
@@ -104,7 +104,7 @@ class LibImp extends Importer {
 		// dynamic
 		await files.copy_recursive(
 			this.cache_bld, this.dst_dynamic,
-			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']), symlinks_raster:true }
+			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']), symlinks_raster:true, ignore_clone_libs:true }
 		);
 		this.genCMakeInclude("LIBJPEG_TURBO");
 	}
