@@ -20,8 +20,7 @@ set(CMAKE_SYSTEM_NAME Generic)
 set(ARD_IVARIANT "${ARDIDE}/hardware/arduino/avr/variants/${ARD_variant}")
 set(ARD_ICORE "${ARDIDE}/hardware/arduino/avr/cores/arduino")
 
-set(ARD_FLAGS "-mmcu=${ARD_MMCU} -DF_CPU=${ARD_FCPU} -I${ARD_IVARIANT} -I${ARD_ICORE}")
-
+set(ARD_FLAGS "-mmcu=${ARD_MMCU} -DF_CPU=${ARD_FCPU}")
 
 set(CMAKE_ASM_COMPILER "${ARDE_PRE}as${ARDE_POS}")
 set(CMAKE_C_COMPILER "${ARDE_PRE}gcc${ARDE_POS}")
@@ -40,6 +39,26 @@ set(CMAKE_EXECUTABLE_SUFFIX ".elf")
 set(CMAKE_EXECUTABLE_SUFFIX_ASM ".elf")
 set(CMAKE_EXECUTABLE_SUFFIX_C ".elf")
 set(CMAKE_EXECUTABLE_SUFFIX_CXX ".elf")
+
+macro(include_directories)
+	foreach(item ${ARGV})
+		set(CMAKE_C_FLAGS     "${CMAKE_C_FLAGS} -I${item}")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${item}")
+	endforeach()
+endmacro()
+macro(target_include_directories proj)
+	set (TSTAT PRIVATE)
+	foreach(item ${ARGV} RANGE 1 9999)
+		if("PUBLIC" STREQUAL "${item}")
+			set (TSTAT PUBLIC)
+		elseif("PRIVATE" STREQUAL "${item}")
+		else()
+			target_compile_options(${proj} ${TSTAT} -I${item})
+		endif()
+	endforeach()
+endmacro()
+
+
 
 file(GLOB_RECURSE ARDCORE_SRC
 	"${ARD_IVARIANT}/*.s"
@@ -62,6 +81,7 @@ file(GLOB_RECURSE ARDCORE_SRC
 list(FILTER ARDCORE_SRC EXCLUDE REGEX "main.cpp$") 
 
 add_library(arduinocore STATIC ${ARDCORE_SRC})
+target_include_directories(arduinocore PUBLIC ${ARD_IVARIANT} ${ARD_ICORE})
 
 macro(USE_ARDU_LIB proj library)
 	set(ext_lib_inc "${ARDIDE}/hardware/arduino/avr/libraries/${library}/src")
