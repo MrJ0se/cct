@@ -13,6 +13,7 @@
   "exclude": [
     "./cache",
     "./bin",
-    "./rsc"
+    "./rsc",
+    "./b"
   ]
 }

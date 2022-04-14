@@ -37,7 +37,23 @@ Status:
 ### IOS:
 - needs a team id specified, to get it, do a login in xcode, export the certified of team, get the number of Organization Unity / Unidade Empresarial of certify, and set on CCT.
 
+### Arduino:
+- setup arduino target with: "cct as \[path to arduino IDE\] \[board\]".
+- generate CMake lines to enable cmake-based autocomplete (to insert in your CMakeLists): "cct acc".
+- send program to arduino with: "cct aw \[path to pogram\] \[port\]".
+
 ## To do (not implemented yet):
 - [ ] spectre mitigation option injection in vcprojects (proc/windows_runtime_spectre.ts).
 - [ ] replace hardcoded Apple SDK version in cmake.ts (use "xcrun --show-sdk-version" to get).
 - [ ] edit opencv script to use cct zlib instead clone zlib.
+
+## Required Tools:
+
+| platform | target(s) | required | recomended |
+| -------- | --------- | -------- | ---------- |
+| windows  | uwp/win32 | visual studio (components: msvc++, uwp, cmake, python, strawberry perl | yasm, git (bash) |
+| linux    | linux     | gcc,g++,binutils,python,perl,cmake | clang, yasm |
+| mac      | mac/ios   | xcode, xcode command line tools, brew, cmake(brew) | yasm |
+|          | android   | android studio (components: ndk), perl, python, cmake | yasm |
+|          | web       | android studio (components: ndk) | perl, python, cmake | |
+|          | arduino   | arduino IDE (components: AVR boards) | CH34X driver (to send program) | |

@@ -290,3 +290,16 @@ const macTCpath = path.resolve(__dirname,"../rsc/mac/ios.toolchain.cmake");
 		};
 	});
 });
+
+getters.set('arduino-avr',async (x:CMakeTC)=>{
+	var toolchain = path.resolve(__dirname, '../rsc/arduino/arduino.toolchain.cmake');
+	x.found = true;
+	x.config = async(target:def.TargetBuild, src:string, dst:string, args:string)=>{
+		if ((await execPipedVerbose(`cmake -DCMAKE_TOOLCHAIN_FILE=${toolchain} ` + args, dst))!=0)
+			throw "";
+	};
+	x.build = async (target:def.TargetBuild, dst:string, release:boolean)=>{
+		if ((await execPipedVerbose(`cmake --build . --config ${release?'Release':'Debug'}`, dst))!=0)
+			throw "";
+	};
+});
