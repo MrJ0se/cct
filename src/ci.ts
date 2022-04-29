@@ -55,12 +55,16 @@ const opts:Opt[] = [
 		ardu.setup(ard_ide, board);
 	}},
 	{long:"arduino-write",short:"aw",desc:"Write program to arduino board",next:async(args:string[], offset:number)=>{
-		var ard_ide = args[offset];
-		if (ard_ide == null)
-			ard_ide = await UI.getline("program path:", true);
+		var program = args[offset];
+		if (program == null)
+			program = await UI.getline("program path:", true);
+		if (program == "") {
+			var t = fs.readdirSync('.').find((x)=>path.extname(x) == ".elf");
+			program = t?t:"";
+		}
 		var tools = new ardu.ArduinoTools();
 		var hex = path.resolve(def.cacheDir,'arduino_program.hex');
-		await tools.extractEEPROM(ard_ide, hex);
+		await tools.extractEEPROM(program, hex);
 		var size = await tools.getHexByteCount(hex);
 		var maxsize = parseInt(tools.board.upload_max_size);
 		console.log(`Program size: ${size} / ${maxsize} (%${size*100/maxsize})`);
@@ -71,6 +75,7 @@ const opts:Opt[] = [
 		var port = args[offset+1];
 		if (port == null)
 			port = await UI.getline("port to write:", true);
+		if (port == "") port = "/dev/ttyUSB0";
 		console.log('execute next line with sudo:')
 		await tools.uploadEEPROM(hex, port);
 	}},

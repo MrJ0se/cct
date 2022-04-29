@@ -87,10 +87,8 @@ macro(USE_ARDU_LIB proj library)
 	set(ext_lib_inc "${ARDIDE}/hardware/arduino/avr/libraries/${library}/src")
 	set(ext_lib arduino_${library})
 
-	target_include_directories(${proj} ${ext_lib_inc})
-	if (${ext_lib}_IMPORTED)
-		target_include_directories(${proj} ${ext_lib})
-	else()
+	if (NOT ${ext_lib}_IMPORTED)
+		set(${ext_lib}_IMPORTED 1)
 		file(GLOB_RECURSE ext_lib_src
 			"${ext_lib_inc}/*.c"
 			"${ext_lib_inc}/*.cc"
@@ -99,10 +97,15 @@ macro(USE_ARDU_LIB proj library)
 			"${ext_lib_inc}/*.cxx"
 		)
 		if (ext_lib_src)
-			set(${ext_lib}_IMPORTED)
+			set(${ext_lib}_LIB 1)
 			add_library(${ext_lib} ${ext_lib_src})
-			target_include_directories(${proj} ${ext_lib})
-		endif()
+			target_link_libraries(${ext_lib} PUBLIC arduinocore)
+			target_include_directories(${ext_lib} PUBLIC ${ext_lib_inc})
+			endif()
+	endif()
+	target_include_directories(${proj} PUBLIC ${ext_lib_inc})
+	if(${ext_lib}_LIB)
+		target_link_libraries(${proj} ${ext_lib})
 	endif()
 endmacro()
 

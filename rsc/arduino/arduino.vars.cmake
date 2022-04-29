@@ -7,6 +7,10 @@ if (NOT ARD_VARS)
 	list(GET ARD_VARS 1 ARD_MMCU)
 	list(GET ARD_VARS 2 ARD_FCPU)
 	list(GET ARD_VARS 3 ARD_variant)
+	
+	set(EMBED_ARDUINO 1)
+	set(EMBED_AVR 1)
+	set(EMBED 1)
 endif()
 
 #inputs per line:
