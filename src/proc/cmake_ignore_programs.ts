@@ -41,16 +41,16 @@ function file(fp:string) {
 		fs.writeFileSync(fp, content);
 }
 export function apply(content:string, fp:string):string {
-	var fake_cpp = path.resolve(fp,'../FAKE_CPP.cpp');
+	var fake_cpp = path.resolve(fp,'../fake.c');
 	if (!fs.existsSync(fake_cpp))
 		fs.writeFileSync(fake_cpp, '');
 
 	if (content.indexOf('macro(add_executable x)') < 0) {
 		content =
-`set(FAKE_CPP_PATH \${CMAKE_CURRENT_LIST_DIR}/FAKE_CPP.cpp)
+`set(FAKE_CPP_PATH \${CMAKE_CURRENT_LIST_DIR}/fake.c)
 macro(add_executable x)
-  add_library(\${x} SHARED \${FAKE_CPP_PATH})
-  set_target_properties(\${x} PROPERTIES LINKER_LANGUAGE CXX)
+  add_library(\${x} STATIC \${FAKE_CPP_PATH})
+  #set_target_properties(\${x} PROPERTIES LINKER_LANGUAGE C)
   set_target_properties(\${x} PROPERTIES PREFIX "__ignore__")
 endmacro()
 `+content;

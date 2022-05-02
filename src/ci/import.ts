@@ -104,6 +104,69 @@ export async function execute(args:string[], offset:number) {
 		throw `Library version unsuported by importer (${libname}): %{libversion}`;
 	var lib_purge = {file:false, source:false, build:false};
 
+	//======================//
+	// part 2 (header only) //
+	//======================//
+	if (lib_imp.opts.headeronly === true) {
+		//@ts-ignore
+		var target = new def.TargetBuild({platform:cmake.current_platform, arch:cmake.current_arch});
+		var dst = `.`;
+
+		for (var i = offset; i < args.length; i++) {
+			var ce = args[i];
+			if (ce == '?') {
+				use_assist = true;
+				continue;
+			}
+			switch (ce) {
+			case "purge-file":lib_purge.file = true; break;
+			case "purge-source":lib_purge.source = true; break;
+			case "purge-build":lib_purge.build = true; break;
+			default: {
+				var di = ce.indexOf(':');
+				if (di > 0) {
+					switch (ce.substring(0, di)) {
+					case "dst":
+						dst = ce.substring(di+1);
+						break;
+					default:
+						if (ce.indexOf('lo-')) break;
+						di = -1;
+					}
+				}
+				if (di == -1)
+					console.log('ignored flag: '+ce);
+			}}
+		}
+		if (use_assist) {
+			var form = new UI.Form();
+			var tb_dst = (new UI.Element()).setInput(dst, "destin directory");
+
+			var cb_purge_fil = (new UI.Element()).setCheckBox("(purge-file) zip file?", lib_purge.file);
+			var cb_purge_src = (new UI.Element()).setCheckBox("(purge-source) source folder?", lib_purge.source);
+			var cb_purge_bld = (new UI.Element()).setCheckBox("(purge-build) build folder?", lib_purge.build);
+
+			form.add(
+				(new UI.Element()).setLabel(`Importer Assistent "${libname}" -> target`),
+				(new UI.Element()).setLabel("(dst:) Destin path:"),
+				tb_dst,
+				(new UI.Element()).setLabel("=== Purge Library Cache ==="),
+				cb_purge_fil,
+				cb_purge_src,
+				cb_purge_bld,
+				(new UI.Element()).setButton("Run Importer").setAction(async ()=> form.close()),
+			);
+			await form.run();
+			console.log("...");
+			dst = tb_dst.text;
+
+			lib_purge.file = cb_purge_fil.checked == true;
+			lib_purge.source = cb_purge_src.checked == true;
+			lib_purge.build = cb_purge_bld.checked == true;
+		}
+		await lib_imp.import(target, libversion, lib_prefs, path.resolve(dst), lib_purge);
+		return;
+	}
 	//========//
 	// part 2 //
 	//========//

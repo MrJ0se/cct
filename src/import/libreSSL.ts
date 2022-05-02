@@ -7,15 +7,16 @@ import * as exec from '../u/exec';
 import * as path from 'path';
 
 export function getImporter():Importer {
-	return new LibImp("libreSSL");
+	return new LibImp("libreSSL", {request_symlink:{build:true}});
 }
 class LibImp extends Importer {
 	getVersions():string[] {
-		return ["3.3.3"];
+		return ["3.5.2","3.4.3","3.3.6","3.3.3"];
 	}
 	getOptions():Map<string,ImpOpt> {
 		var k = new Map<string,ImpOpt>();
-		k.set("asm", {value:"true", values:["true", "false"], desc:"Build with asm optimization"})
+		k.set("asm", {value:"true", values:["true", "false"], desc:"Build with asm optimization"});
+		k.set("autogencrash", {value:"false", values:["true", "false"], desc:"Stop on autogen error"});
 		return k;
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
@@ -31,7 +32,9 @@ class LibImp extends Importer {
 			if ((await exec.execPipedVerbose([tools.getAppFullpath(['sh','bash']), 'autogen.sh'], cmake_dir)) != 0) {
 				if (process.platform=='win32')
 					console.log('autogen.sh must be runned in a no-windows enviroment before (first import of library, requires: autoconf and libtool-bin)');
-				throw "failed to execute autogen.sh ()";
+				//@ts-ignore
+				if (options.get('autogencrash').value=='true')
+					throw "failed to execute autogen.sh ()";
 			}
 		});
 		await this.dopeFile(path.resolve(cmake_dir, 'crypto/compat/arc4random.c'), async (text)=>
@@ -89,9 +92,9 @@ class LibImp extends Importer {
 		this.genCMakeInclude(
 			"LIBRESSL",
 			[
-				{op:ReorderOp.ADD_TO_NEW, filter:'*cryp*'},
-				{op:ReorderOp.ADD_TO_NEW, filter:'*ssl*'},
 				{op:ReorderOp.ADD_TO_NEW, filter:'*tls*'},
+				{op:ReorderOp.ADD_TO_NEW, filter:'*ssl*'},
+				{op:ReorderOp.ADD_TO_NEW, filter:'*cryp*'},
 				{op:ReorderOp.ADD_TO_NEW, filter:'*'},
 			]
 		);

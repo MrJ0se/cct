@@ -51,6 +51,7 @@ export interface NewImporterOpts {
 		source?:boolean,
 		build?:boolean
 	}
+	headeronly?:boolean,
 }
 export class Importer {
 	getLibraryJSON(path_dir:string){
@@ -80,7 +81,23 @@ export class Importer {
 	}
 	async import(target:def.TargetBuild, version:string, options:Map<string,ImpOpt>, dst:string, purge?:{file?:boolean, source?:boolean, build?:boolean}):Promise<void> {
 		this.purge = purge;
-		var unamev = this.name+'/'+version;	
+		var unamev = this.name+'/'+version;
+		if (this.opts.headeronly) {
+			/*no dst_static, dst_dynamic, no cache_bld
+			*/
+			this.dst_inc = path.resolve(dst, unamev, "include");
+			this.cache_file = path.resolve(
+				(this.opts.request_symlink && this.opts.request_symlink.download && !def.cacheSupportSymlink)?
+					def.tcacheDirDownload:def.cacheDirDownload,
+				unamev
+			);
+			this.cache_src = path.resolve(
+				(this.opts.request_symlink && this.opts.request_symlink.source && !def.cacheSupportSymlink)?
+					def.tcacheDirSource:def.cacheDirSource,
+				unamev
+			);
+			return;	
+		}
 		var uname = unamev+"/"+def.Target_join(target.target);
 		this.dst_inc = path.resolve(dst, uname, "include");
 		this.dst_static = path.resolve(dst, uname, "static");
@@ -116,6 +133,10 @@ export class Importer {
 	async requestLibraryDir(target:def.TargetBuild, dst:string, libname:string, version?:string, import_if_not_found?:boolean):Promise<string> {
 		var triple = def.Target_join(target.target);
 		if (version) {
+			//<headeronly>
+			if (fs.existsSync(path.resolve(dst, libname, version, 'include')))
+				return path.resolve(dst, libname, version);
+			//</headeronly>
 			if (fs.existsSync(path.resolve(dst, libname, version, triple)))
 				return path.resolve(dst, libname, version, triple);
 			if (import_if_not_found !== true)
@@ -123,7 +144,10 @@ export class Importer {
 
 			var imp = loadImporter(libname, true) as Importer;
 			await imp.import(target, version, imp.getOptions(), dst);
-
+			//<headeronly>
+			if (fs.existsSync(path.resolve(dst, libname, version, 'include')))
+				return path.resolve(dst, libname, version);
+			//</headeronly>
 			return path.resolve(dst, libname, version, triple);
 		}
 
@@ -136,9 +160,18 @@ export class Importer {
 
 			if (found_versions.length > 0) {
 				for (var i = versions.length - 1; i >= 0; i--) {
-					if (found_versions.find((x)=>x == versions[i]) != null)
+					if (found_versions.find((x)=>x == versions[i]) != null) {
+						//<headeronly>
+						if (fs.existsSync(path.resolve(dst, libname, versions[i], 'include')))
+							return path.resolve(dst, libname, versions[i]);
+						//</headeronly>
 						return path.resolve(dst, libname, versions[i], triple);
+					}
 				}
+				//<headeronly>
+				if (fs.existsSync(path.resolve(dst, libname, found_versions[found_versions.length - 1], 'include')))
+					return path.resolve(dst, libname, found_versions[found_versions.length - 1]);
+				//</headeronly>
 				return path.resolve(dst, libname, found_versions[found_versions.length - 1], triple);
 			}
 		}
@@ -147,6 +180,11 @@ export class Importer {
 
 		version = versions[versions.length - 1];
 		await imp.import(target, version, imp.getOptions(), dst);
+
+		//<headeronly>
+		if (fs.existsSync(path.resolve(dst, libname, version, 'include')))
+			return path.resolve(dst, libname, version);
+		//</headeronly>
 
 		return path.resolve(dst, libname, version, triple);
 	}
@@ -210,30 +248,34 @@ export class Importer {
 		var static_libs:string[] = [];
 		var dynamic_libs:string[] = [];
 		var dynamic_copy:string[] = [];
-		if (fs.existsSync(this.dst_static))
-			static_libs = reorderLib(fs.readdirSync(this.dst_static), order);
-		if (fs.existsSync(this.dst_dynamic)) {
-			var temp = fs.readdirSync(this.dst_dynamic);
-			dynamic_libs = reorderLib(temp.filter((x)=>
-				files.filterName(x, ['*.lib','*.so','*.dylib'])
-			), order)
-			dynamic_copy = temp.filter((x)=>
-				files.filterName(x, ['*.dll','*.so','*.dylib'])
-			);
-		}
-		if (static_libs.length>0)
-			text += `set(${name}_STATIC ${static_libs.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/static/'+x).join(' ')})\n`;
-		if (dynamic_libs.length>0) {
-			text += `set(${name}_DYNAMIC ${dynamic_libs.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/dynamic/'+x).join(' ')})\n`;
-			text += `set(${name}_DYNAMIC_CPY ${dynamic_copy.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/dynamic/'+x).join(' ')})\n`;
+		if (this.opts.headeronly !== true) {
+			if (fs.existsSync(this.dst_static))
+				static_libs = reorderLib(fs.readdirSync(this.dst_static), order);
+			if (fs.existsSync(this.dst_dynamic)) {
+				var temp = fs.readdirSync(this.dst_dynamic);
+				dynamic_libs = reorderLib(temp.filter((x)=>
+					files.filterName(x, ['*.lib','*.so','*.dylib'])
+				), order)
+				dynamic_copy = temp.filter((x)=>
+					files.filterName(x, ['*.dll','*.so','*.dylib'])
+				);
+			}
+			if (static_libs.length>0)
+				text += `set(${name}_STATIC ${static_libs.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/static/'+x).join(' ')})\n`;
+			if (dynamic_libs.length>0) {
+				text += `set(${name}_DYNAMIC ${dynamic_libs.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/dynamic/'+x).join(' ')})\n`;
+				text += `set(${name}_DYNAMIC_CPY ${dynamic_copy.map((x)=>'${CMAKE_CURRENT_LIST_DIR}/dynamic/'+x).join(' ')})\n`;
+			}
 		}
 		if (additional_cmake)
 			text += '\n'+additional_cmake;
 		fs.writeFileSync(path.resolve(this.dst_inc, '../inc.cmake'), text);
+		//JSON
 		var json_save:any = {
 			static:static_libs,
 			dynamic:dynamic_libs,
-			dynamic_copy
+			dynamic_copy,
+			headeronly:(this.opts.headeronly == true)
 		};
 		fs.writeFileSync(path.resolve(this.dst_inc, '../inc.json'), JSON.stringify(json_save));
 	}

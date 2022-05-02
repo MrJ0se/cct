@@ -34,6 +34,8 @@ export interface FilterPrefs {
 async function testFilter(x:string, config?:FilterPrefs):Promise<boolean> {
 	if (!fs.existsSync(x))
 		return false;
+	if (path.basename(x).indexOf('__ignore__') == 0)
+		return false;
 	if (config) {
 		var is_dir = fs.statSync(x).isDirectory();
 		if (config.symlinks_ignore) {
@@ -57,8 +59,6 @@ async function testFilter(x:string, config?:FilterPrefs):Promise<boolean> {
 		} else if (config.file_filter) {
 			if (config.ignore_clone_libs) {
 				if (isInNameVersionDylib(x))
-					return false;
-				if (path.basename(x).indexOf('__ignore__') == 0)
 					return false;
 			}
 			return config.file_filter(x);

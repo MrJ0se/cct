@@ -1,4 +1,4 @@
-import {Importer,ImpOpt} from "../import";
+import {Importer,ImpOpt,ReorderOp} from "../import";
 import * as def from '../def';
 import * as tools from '../tools';
 import * as cmake from '../cmake';
@@ -55,6 +55,13 @@ class LibImp extends Importer {
 			this.cache_bld, this.dst_dynamic,
 			{ sub_folder_src:true, file_filter:(x:string)=>files.filterName(x, ['*.so','*.lib','*.dll','*.dylib']) && !files.filterName(x, ['*static*.lib']), symlinks_raster:true, ignore_clone_libs:true }
 		);
-		this.genCMakeInclude("BROTLI");
+		this.genCMakeInclude(
+			"BROTLI",
+			[
+				{op:ReorderOp.ADD_TO_NEW, filter:'*enc*'},
+				{op:ReorderOp.ADD_TO_NEW, filter:'*dec*'},
+				{op:ReorderOp.ADD_TO_NEW, filter:'*'},
+			]
+		);
 	}
 }
