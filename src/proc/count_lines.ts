@@ -119,7 +119,8 @@ var pexcludename = [
 	"build",
 	"ext",
 	"package-lock.json",
-	"document"
+	"document",
+	"cache"
 ];
 export function count(localpath:string):Map<string, number> {
 	var r = new Map<string, number>([["files",0],["media files",0],["folders",0]]);

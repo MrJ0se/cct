@@ -208,7 +208,7 @@ export class Importer {
 			await build_func(false);
 		fs.writeFileSync(build_ok, "");
 	}
-	async dopeCmake(pf:string) {
+	async dopeCmake(pf:string, doper?:(text:string, fp:string)=>Promise<string>, opts?:{requestC17?:boolean}):Promise<void> {
 		if (fs.existsSync(pf)) {
 			if (fs.statSync(pf).isDirectory()) {
 				pf = path.resolve(pf, 'CMakeLists.txt');
@@ -217,10 +217,13 @@ export class Importer {
 			}
 			var pf_ok = pf+".cmake_ok";
 			if (!fs.existsSync(pf_ok)) {
-				fs.writeFileSync(pf,
-					cmake_ignore_program.apply(cmake_pic_std.apply(cmake_remove_install.apply(
+				var txt = cmake_ignore_program.apply(cmake_pic_std.apply(cmake_remove_install.apply(
 						fs.readFileSync(pf, 'utf-8')
-					)), pf)
+					), opts && opts.requestC17), pf);
+				if (doper)
+					txt = await doper(txt, pf);
+				fs.writeFileSync(pf,
+					txt
 				);
 				fs.writeFileSync(pf_ok, '');
 			}

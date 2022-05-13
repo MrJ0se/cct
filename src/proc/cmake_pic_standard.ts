@@ -40,10 +40,10 @@ function file(fp:string) {
 	if (content2 != content)
 		fs.writeFileSync(fp, content);
 }
-export function apply(content:string):string {
+export function apply(content:string, useC17?:boolean):string {
 	[
 		'set(CMAKE_CXX_STANDARD_REQUIRED ON)',
-		'set(CMAKE_CXX_STANDARD 14)',
+		`set(CMAKE_CXX_STANDARD ${useC17?'17':'14'})`,
 		'set(CMAKE_C_STANDARD_REQUIRED ON)',
 		'set(CMAKE_C_STANDARD 11)',
 		'set(CMAKE_POSITION_INDEPENDENT_CODE ON)',

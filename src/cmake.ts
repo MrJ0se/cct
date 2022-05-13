@@ -254,8 +254,10 @@ getters.set('web-wasm',async (x:CMakeTC)=>{
 	x.build = async (target:def.TargetBuild, dst:string, release:boolean)=>{
 		if ((await execPipedVerbose(`cmake --build . --config ${release?'Release':'Debug'}`, dst))!=0)
 			throw "";
-		console.log('running post release build uglify...');
-		uglify(dst);
+		if (release) {
+			console.log('running post release build uglify...');
+			uglify(dst);
+		}
 	};
 });
 
