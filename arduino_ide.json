@@ -1,0 +1,12 @@
+{
+	"linux":{
+		"ide":"/home/master/.arduino/arduino-1.8.19",
+		"avrTool":"/home/master/.arduino/arduino-1.8.19/hardware/tools/avr",
+		"avrArduino":"/home/master/.arduino/arduino-1.8.19/hardware/arduino/avr",
+
+		"esp8266Tool":"/home/master/.arduino15/packages/esp8266/tools",
+		"esp8266Package":"/home/master/.arduino15/packages/esp8266/hardware/esp8266/3.0.2"
+	},
+	"win32":"undefined",
+	"darwin":"undefined"
+}

@@ -1,14 +1,14 @@
-if (NOT ARDUINO_TOOLCHAIN)
-set (ARDUINO_TOOLCHAIN 1)
+if (NOT AVR_TOOLCHAIN)
+set (AVR_TOOLCHAIN 1)
 
 set(CMAKE_C_OUTPUT_EXTENSION .o)
 set(CMAKE_C_OUTPUT_EXTENSION_REPLACE 1)
 set(CMAKE_CXX_OUTPUT_EXTENSION .o)
 set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
 
-include ("${CMAKE_CURRENT_LIST_DIR}/arduino.vars.cmake")
+include ("${CMAKE_CURRENT_LIST_DIR}/../vars.cmake")
 
-set(ARDE_PRE "${ARDIDE}/hardware/tools/avr/bin/avr-")
+set(ARDE_PRE "${ARDIDE_TOOL}/bin/avr-")
 set(ARDE_POS "")
 if (WIN32)
 	set(ARDE_POS ".exe")
@@ -17,8 +17,8 @@ endif()
 set(CMAKE_SYSTEM_NAME Generic)
 
 
-set(ARD_IVARIANT "${ARDIDE}/hardware/arduino/avr/variants/${ARD_variant}")
-set(ARD_ICORE "${ARDIDE}/hardware/arduino/avr/cores/arduino")
+set(ARD_IVARIANT "${ARDIDE_ARD}/variants/${ARD_variant}")
+set(ARD_ICORE "${ARDIDE_ARD}/cores/arduino")
 
 set(ARD_FLAGS "-mmcu=${ARD_MMCU} -DF_CPU=${ARD_FCPU}")
 
@@ -84,7 +84,7 @@ add_library(arduinocore STATIC ${ARDCORE_SRC})
 target_include_directories(arduinocore PUBLIC ${ARD_IVARIANT} ${ARD_ICORE})
 
 macro(USE_ARDU_LIB proj library)
-	set(ext_lib_inc "${ARDIDE}/hardware/arduino/avr/libraries/${library}/src")
+	set(ext_lib_inc "${ARDIDE_ARD}/libraries/${library}/src")
 	set(ext_lib arduino_${library})
 
 	if (NOT ${ext_lib}_IMPORTED)

@@ -8,9 +8,9 @@ import * as path from 'path';
 import {execute as cmake_exec} from './ci/cmake';
 import {execute as tools_exec} from './ci/tools';
 import {execute as import_exec} from './ci/import';
+import * as embed from './ci/embed';
 import {runTestServer} from './u/wasm_server';
 import * as counter from './proc/count_lines';
-import * as ardu from './arduino';
 
 interface Opt {
 	long:string,
@@ -40,47 +40,10 @@ const opts:Opt[] = [
 		//keep running server
 		await new Promise(()=>{});
 	}},
-	{long:"arduino-setup",short:"as",desc:"Setup a arduino CMake variables, for a specific board",next:async(args:string[], offset:number)=>{
-		var ard_ide = args[offset];
-		if (ard_ide == null)
-			ard_ide = await UI.getline("arduino IDE path:", true);
-		var boards = ardu.getBoards(ard_ide);
-		console.log('found boards:\n'+boards.map((x)=>`\t${x.name} (${x.id})\n`).join(""));
-		var ard_board = args[offset+1];
-		if (ard_board == null)
-			ard_board = await UI.getline("arduino board id:", true);
-		var board = boards.find((x)=>x.id == ard_board);
-		if (board == null)
-			throw "invalid arduino board";
-		ardu.setup(ard_ide, board);
-	}},
-	{long:"arduino-write",short:"aw",desc:"Write program to arduino board",next:async(args:string[], offset:number)=>{
-		var program = args[offset];
-		if (program == null)
-			program = await UI.getline("program path:", true);
-		if (program == "") {
-			var t = fs.readdirSync('.').find((x)=>path.extname(x) == ".elf");
-			program = t?t:"";
-		}
-		var tools = new ardu.ArduinoTools();
-		var hex = path.resolve(def.cacheDir,'arduino_program.hex');
-		await tools.extractEEPROM(program, hex);
-		var size = await tools.getHexByteCount(hex);
-		var maxsize = parseInt(tools.board.upload_max_size);
-		console.log(`Program size: ${size} / ${maxsize} (%${size*100/maxsize})`);
-		if (size > maxsize)
-			throw "program large than target memory";
-
-		console.log('in linux: "dmesg | grep tty" to get ports, commonly: "/dev/ttyUSB0"');
-		var port = args[offset+1];
-		if (port == null)
-			port = await UI.getline("port to write:", true);
-		if (port == "") port = "/dev/ttyUSB0";
-		console.log('execute next line with sudo:')
-		await tools.uploadEEPROM(hex, port);
-	}},
-	{long:"arduino-cmake-complete",short:"acc",desc:"Generate a CMake line to enable autocomplete",next:async()=>{
-		console.log(`option(ARD_AUTO_COMPLETE "enable auto complete" ON)\nif(ARD_AUTO_COMPLETE)\ninclude(${path.resolve(__dirname, "../rsc/arduino/EasyClangComplete.cmake")})\nendif()`);	
+	{long:"embed-setup",short:"es",desc:"Chose target board and configuration of platform \"EMBED\"",next:embed.setup},
+	{long:"ember-load",short:"el",desc:"Write program to the board board",next:embed.load},
+	{long:"embed-cmake-complete",short:"ecc",desc:"Generate a CMake line to enable autocomplete",next:async()=>{
+		console.log(`option(EMBED_AUTO_COMPLETE "enable auto complete" ON)\nif(EMBED_AUTO_COMPLETE)\ninclude(${path.resolve(__dirname, "../rsc/embed/EasyClangComplete.cmake")})\nendif()`);	
 	}},
 	{long:"countlines",short:"ct",desc:"Gen statics about files under folder and subfolders",next:async(args:string[], offset:number)=>{
 		console.log(counter.toPrint(counter.count(path.resolve("."))));

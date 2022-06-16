@@ -47,7 +47,7 @@ export enum Platform {
 	IOS = "ios",
 	IOS_EMU = "iosemu",
 	WEB = "web",
-	ARD = "arduino"
+	EMB = "embed"
 };
 export enum Arch {
 	X32 = "x32",
@@ -56,7 +56,7 @@ export enum Arch {
 	A64 = "arm64",
 	WASM = "wasm",
 
-	AVR = "avr",
+	EMB = "embed",
 };
 export enum BuildMode {
 	DEBUG = "debug",

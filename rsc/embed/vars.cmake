@@ -1,0 +1,18 @@
+if (NOT ARD_VARS)
+	if(NOT EXISTS "${CMAKE_CURRENT_LIST_DIR}/../../cache/embed_cmake.txt")
+		message(FATAL "cant found embed configuration configuration, set a board on CCT.")
+	endif()
+	file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/../../cache/embed_cmake.txt" ARD_VARS)
+
+	list(GET ARD_VARS 0 BOARDPACKAGE)
+	if ("${BOARDPACKAGE}" STREQUAL "AVR")
+		list(GET ARD_VARS 1 ARDIDE_TOOL)
+		list(GET ARD_VARS 2 ARDIDE_ARD)
+		list(GET ARD_VARS 3 ARD_MMCU)
+		list(GET ARD_VARS 4 ARD_FCPU)
+		list(GET ARD_VARS 5 ARD_variant)
+		set(EMBED_AVR 1)
+	endif()
+
+	set(EMBED 1)
+endif()
