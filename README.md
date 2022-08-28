@@ -1,3 +1,7 @@
+## Support changelog:
+
+- 28/8: plan to drop/pause support for ![MacOS](./md/mac.png) ![IOS](./md/ios.png) ![UWP/XBOX](./md/xbx.png) ![Arduino](./md/ard.png) (working but without updates/corrections) and ![ESP](./md/esp.png) (not yet runnable)
+
 ## Imports:
 Status:
 - 🔨 some limitations
@@ -45,7 +49,7 @@ Status:
 ## To do (not implemented yet):
 - [ ] spectre mitigation option injection in vcprojects (proc/windows_runtime_spectre.ts).
 - [ ] replace hardcoded Apple SDK version in cmake.ts (use "xcrun --show-sdk-version" to get).
-- [ ] edit opencv script to use cct zlib instead clone zlib.
+- [ ] edit opencv script to use cct zlib instead clone a compile a new zlib.
 
 ## Required Tools:
 
