@@ -1,3 +1,7 @@
+## Obsolet
+
+Indevelopment replacement: https://github.com/MrJ0se/deno-cct
+
 ## Support changelog:
 
 - 28/8: plan to drop/pause support for ![MacOS](./md/mac.png) ![IOS](./md/ios.png) ![UWP/XBOX](./md/xbx.png) ![Arduino](./md/ard.png) (working but without updates/corrections) and ![ESP](./md/esp.png) (not yet runnable)
